@@ -140,6 +140,7 @@ class Alert(models.Model):
     alert_id = models.AutoField(primary_key=True)
     alert_date = models.DateField()
     crop_production = models.ForeignKey('CropProduction')
+    risk_rate = models.FloatField()
     disease = models.ForeignKey('Disease')
     feedback_treated = models.IntegerField(blank=True, null=True)
     feedback_date = models.DateField(blank=True, null=True)
