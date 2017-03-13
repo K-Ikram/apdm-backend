@@ -78,7 +78,7 @@ class Plot(models.Model):
    latitude_s = models.FloatField()
    longitude_s = models.FloatField()
    soil_type = models.CharField(max_length=10, blank=True, null=True)
-   farm = models.ForeignKey('Plot')
+   farm = models.ForeignKey('Farm')
    comments = models.CharField(max_length=50, blank=True, null=True)
    sensors = models.ManyToManyField(Sensor, through = 'SensorPlot')
 
@@ -122,8 +122,8 @@ class CropProductionDisease(models.Model):
 
 
 class CropProductionSensor(models.Model):
-    crop_production = models.ForeignKey(CropProduction, primary_key = True)
-    sensor = models.ForeignKey(Sensor)
+    crop_production = models.ForeignKey(CropProduction, on_delete=models.CASCADE)
+    sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE )
 
 
 #class Measure(models.Model):
