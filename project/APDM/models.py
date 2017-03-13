@@ -182,7 +182,7 @@ class DjangoMigrations(models.Model):
 
 class FhbPredictions(models.Model):
     prediction_id = models.AutoField(primary_key=True)
-    predcition_date = models.DateTimeField()
+    prediction_date = models.DateTimeField()
     crop_production = models.IntegerField()
     temp_duration = models.FloatField()
     humidity_avg = models.FloatField()
