@@ -1,7 +1,8 @@
 from __future__ import unicode_literals
 
 from django.db import models
-
+from django.contrib.auth.models import AbstractUser
+from django.conf import settings 
 # Create your models here.
 
 
@@ -15,21 +16,20 @@ class City(models.Model):
     def __unicode__(self):
         return self.city_name
 
-class Client(models.Model):
+class Client(AbstractUser):
     client_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=50)
-    surname = models.CharField(max_length=50)
+    #name = models.CharField(max_length=50)
+    #surname = models.CharField(max_length=50)
     gender = models.CharField(max_length=5, blank=True, null=True)
-    email = models.CharField(max_length=50)
+    #email = models.CharField(max_length=50)
     phone_contact = models.CharField(max_length=50)
     phone_sms = models.CharField(max_length=50)
     language = models.CharField(max_length=50, blank=True, null=True)
     comments = models.CharField(max_length=100, blank=True, null=True)
-    class Meta:
-        managed = False
-        db_table = 'client'
-    def __unicode__(self):
-        return self.name
+    #class Meta:
+        #managed = False
+        #db_table = 'client'
+    
 
 class Farm(models.Model):
     farm_id = models.AutoField(primary_key=True)
@@ -45,7 +45,7 @@ class Farm(models.Model):
         return self.farm_name
 
 class Ownfarm(models.Model):
-    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     farm = models.ForeignKey(Farm, on_delete=models.CASCADE)
   
 
@@ -92,8 +92,8 @@ class Plot(models.Model):
 class SensorPlot(models.Model):
     plot = models.ForeignKey('Plot',on_delete=models.CASCADE)
     sensor = models.ForeignKey('Sensor',on_delete=models.CASCADE)
-    date_debut = models.DateField()
-    date_fin = models.DateField(blank=True, null=True)
+    start_date = models.DateField()
+    end_date = models.DateField(blank=True, null=True)
     
 class CropProduction(models.Model):
     crop_production_id = models.AutoField(primary_key=True)
@@ -119,23 +119,12 @@ class CropProductionDisease(models.Model):
     crop_production = models.ForeignKey(CropProduction, on_delete=models.CASCADE)
     disease = models.ForeignKey(Disease, on_delete=models.CASCADE)
  
-
-
+    
 class CropProductionSensor(models.Model):
     crop_production = models.ForeignKey(CropProduction, on_delete=models.CASCADE)
     sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE )
-
-
-#class Measure(models.Model):
-#    measure_id = models.AutoField(primary_key=True)
-#    measure_value = models.FloatField()
-#    measure_timestamp = models.DateTimeField()
-#    sensor = models.ForeignKey('Sensor')
-#
-#    class Meta:
-#        managed = False
-#        db_table = 'measure'
-#        
+    
+    
 class Alert(models.Model):
     alert_id = models.AutoField(primary_key=True)
     alert_date = models.DateField()
@@ -145,7 +134,7 @@ class Alert(models.Model):
     feedback_treated = models.IntegerField(blank=True, null=True)
     feedback_date = models.DateField(blank=True, null=True)
     alert_confirmed = models.IntegerField(blank=True, null=True)
-    client = models.ForeignKey('Client',blank=True, null=True)
+    client = models.ForeignKey(settings.AUTH_USER_MODEL,blank=True, null=True)
 
     class Meta:
         managed = False
@@ -158,7 +147,7 @@ class Anomaly(models.Model):
     anomaly_id = models.AutoField(primary_key=True)
     occurence_date = models.DateField()
     reporting_date = models.DateField()
-    client = models.ForeignKey('Client', on_delete=models.CASCADE)
+    client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     crop_production = models.ForeignKey('CropProduction')
     disease = models.ForeignKey('Disease')
     treated = models.IntegerField(blank=True, null=True)
@@ -183,7 +172,7 @@ class DjangoMigrations(models.Model):
 class FhbPredictions(models.Model):
     prediction_id = models.AutoField(primary_key=True)
     prediction_date = models.DateTimeField()
-    crop_production = models.IntegerField()
+    crop_production_id = models.IntegerField()
     temp_duration = models.FloatField()
     humidity_avg = models.FloatField()
     rainfall_duration = models.FloatField()
