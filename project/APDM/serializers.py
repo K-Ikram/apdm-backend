@@ -28,3 +28,27 @@ class FarmSerializer(serializers.ModelSerializer):
     class Meta:
         model = Farm
         fields = '__all__'
+
+class AlertSerializer(serializers.ModelSerializer):
+    #clients = ClientSerializer(many=True)
+    class Meta:
+        model = Alert
+        fields = '__all__'
+
+
+
+class ClientSerializer(serializers.ModelSerializer):
+    #clients = ClientSerializer(many=True)
+    class Meta:
+        model = Client
+        fields = '__all__'
+
+
+
+
+
+
+
+
+
+

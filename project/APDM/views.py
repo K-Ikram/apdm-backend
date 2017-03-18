@@ -8,19 +8,12 @@ from rest_framework import mixins
 from rest_framework import generics
 
 # Create your views here.
-class PlotList(mixins.ListModelMixin,
-               mixins.CreateModelMixin,
-               generics.GenericAPIView):
+class PlotList(generics.ListCreateAPIView):
     
     queryset = Plot.objects.all()
     serializer_class = PlotSerializer
     
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)  
-
+   
 class PlotsByFarm(APIView):
     
     def get_plots_by_farm_ID(self, farm):
@@ -34,53 +27,25 @@ class PlotsByFarm(APIView):
         serializer = PlotSerializer(plots, many= True)
         return Response(serializer.data)
 
-class PlotDetail(mixins.RetrieveModelMixin,
-                 mixins.UpdateModelMixin,
-                 mixins.DestroyModelMixin,
-                 generics.GenericAPIView):
+class PlotDetail(generics.RetrieveUpdateDestroyAPIView):
     
     queryset = Plot.objects.all()
     serializer_class = PlotSerializer
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
-class FarmList(mixins.ListModelMixin,
-               mixins.CreateModelMixin,
-               generics.GenericAPIView):
+   
+class FarmList(generics.ListCreateAPIView):
     
     queryset = Farm.objects.all()
     serializer_class = FarmSerializer
     
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
-
+ 
     
-class FarmDetail(mixins.RetrieveModelMixin,
-                 mixins.UpdateModelMixin,
-                 mixins.DestroyModelMixin,
-                 generics.GenericAPIView):
+class FarmDetail(generics.RetrieveUpdateDestroyAPIView):
     
     queryset = Farm.objects.all()
     serializer_class = FarmSerializer
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+   
 
 class FarmsByClient(APIView):
     
@@ -95,35 +60,19 @@ class FarmsByClient(APIView):
         serializer = FarmSerializer(farms, many= True)
         return Response(serializer.data)
 
-class CropProductionList(mixins.ListModelMixin,
-               mixins.CreateModelMixin,
-               generics.GenericAPIView):
+class CropProductionList(generics.ListCreateAPIView):
     
     queryset = CropProduction.objects.all()
     serializer_class = CropProductionSerializer
     
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
+    
         
-class CropProductionDetail(mixins.RetrieveModelMixin,
-                 mixins.UpdateModelMixin,
-                 mixins.DestroyModelMixin,
-                 generics.GenericAPIView):
+class CropProductionDetail(generics.RetrieveUpdateDestroyAPIView):
     
     queryset = CropProduction.objects.all()
     serializer_class = CropProductionSerializer
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    
     
 class CropProductionsByPlot(APIView):
     
@@ -163,4 +112,51 @@ class RiskRatesByCropProduction(APIView):
         
         serializer = PredictionSerializer(predictions, many= True)
         return Response(serializer.data)    
+
+
+class CropProductionsByPlot(APIView):
     
+    def get_crop_productions_by_plot_ID(self, plot):
+        try:
+            return list(CropProduction.objects.filter(plot=plot))
+        except CropProduction.DoesNotExist:
+            raise Http404
+
+    def get(self, request, plot, format=None):
+        crop_productions = self.get_crop_productions_by_plot_ID(plot)
+        serializer = CropProductionSerializer(crop_productions, many= True)
+        return Response(serializer.data)
+    
+    
+class AlertByCropProduction(APIView):
+    
+    def get_alert_by_crop_production(self, idCropProd):
+        try:
+            return list(Alert.objects.filter(crop_production=idCropProd))
+        except Alert.DoesNotExist:
+            raise Http404
+
+    def get(self, request,  idCropProd, format=None):
+        alerts = self.get_alert_by_crop_production(idCropProd)
+        serializer = AlertSerializer(alerts, many= True)
+        return Response(serializer.data) 
+    
+class ClientDetail(generics.RetrieveAPIView):
+    queryset = Client.objects.all()
+    serializer_class = ClientSerializer
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

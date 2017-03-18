@@ -128,9 +128,9 @@ class CropProductionSensor(models.Model):
 class Alert(models.Model):
     alert_id = models.AutoField(primary_key=True)
     alert_date = models.DateField()
-    crop_production = models.ForeignKey('CropProduction')
+    crop_production = models.ForeignKey(CropProduction, on_delete=models.CASCADE)
     risk_rate = models.FloatField()
-    disease = models.ForeignKey('Disease')
+    disease = models.ForeignKey(Disease, on_delete=models.CASCADE)
     feedback_treated = models.IntegerField(blank=True, null=True)
     feedback_date = models.DateField(blank=True, null=True)
     alert_confirmed = models.IntegerField(blank=True, null=True)
