@@ -52,7 +52,6 @@ class FarmDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Farm.objects.all()
     serializer_class = FarmSerializer
 
-1
 
 class FarmsByClient(APIView):
     
