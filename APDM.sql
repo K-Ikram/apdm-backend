@@ -167,7 +167,7 @@ CREATE TABLE  fhb_predictions
 
 );
 
-CREATE TABLE fhb_voisinage
+CREATE TABLE fhb_neighborhood
 (
   prediction_id int NOT NULL references fhb_predictions(prediction_id),
   training_set_id int not null references fhb_training_set(training_set_id),
@@ -198,9 +198,9 @@ INSERT INTO `farm` (`farm_id`, `farm_name`, `city_id`, `comments`) VALUES (NULL,
 INSERT INTO `farm` (`farm_id`, `farm_name`, `city_id`, `comments`) VALUES (NULL, 'farm abc', '26', NULL);
 INSERT INTO `farm` (`farm_id`, `farm_name`, `city_id`, `comments`) VALUES (NULL, 'smartfarm', '16', NULL);
 
-INSERT INTO `client` (`client_id`, `name`, `surname`, `gender`, `email`, `phone_contact`, `phone_sms`, `language`, `comments`) VALUES (NULL, 'rafed', 'wassila', 'femme', 'cw_rafed@esi.dz', '+213797820473', '+213797820473', 'english', NULL);
-INSERT INTO `client` (`client_id`, `name`, `surname`, `gender`, `email`, `phone_contact`, `phone_sms`, `language`, `comments`) VALUES (NULL, 'karouche', 'ikram', 'femme', 'ci_karouche@esi.dz', '+213797820473', '+213797820473', 'english', NULL);
-INSERT INTO `client` (`client_id`, `name`, `surname`, `gender`, `email`, `phone_contact`, `phone_sms`, `language`, `comments`) VALUES (NULL, 'ilmane', 'nassim', 'homme', 'nassim.ilmane@gmail.com', '+213797820473', '+213797820473', 'english', NULL);
+--INSERT INTO `client` (`client_id`, `name`, `surname`, `gender`, `email`, `phone_contact`, `phone_sms`, `language`, `comments`) VALUES (NULL, 'rafed', 'wassila', 'femme', 'cw_rafed@esi.dz', '+213797820473', '+213797820473', 'english', NULL);
+--INSERT INTO `client` (`client_id`, `name`, `surname`, `gender`, `email`, `phone_contact`, `phone_sms`, `language`, `comments`) VALUES (NULL, 'karouche', 'ikram', 'femme', 'ci_karouche@esi.dz', '+213797820473', '+213797820473', 'english', NULL);
+--INSERT INTO `client` (`client_id`, `name`, `surname`, `gender`, `email`, `phone_contact`, `phone_sms`, `language`, `comments`) VALUES (NULL, 'ilmane', 'nassim', 'homme', 'nassim.ilmane@gmail.com', '+213797820473', '+213797820473', 'english', NULL);
 
 INSERT INTO `plot` (`plot_id`, `plot_name`, `soil_type`, `farm_id`, `comments`) VALUES (NULL, 'plot in metidja', 'aride', '2', NULL);
 INSERT INTO `plot` (`plot_id`, `plot_name`, `soil_type`, `farm_id`, `comments`) VALUES (NULL, 'plot in farm_ida', 'aride', '3', NULL);

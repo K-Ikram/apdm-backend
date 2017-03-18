@@ -24,16 +24,16 @@ class CropProductionSensorInline(admin.TabularInline):
     
     
 class ClientAdmin(admin.ModelAdmin):
-    list_display=['name','surname','email','phone_contact','phone_sms']
+    list_display=['username','first_name','last_name','email','phone_contact','phone_sms','is_active', 'is_staff', 'is_superuser']
     inlines = [OwnfarmInline]
   
 
 class FarmAdmin(admin.ModelAdmin):
-    list_display=['farm_name','city' ,'get_farms']
+    list_display=['farm_name','city' ,'get_clients']
     inlines = [OwnfarmInline]
     
-    def get_farms(self, obj):
-        return "\n".join([p.name for p in obj.clients.all()])
+    def get_clients(self, obj):
+        return "\n".join([p.username for p in obj.clients.all()])
     
 class SensorPlotInline(admin.TabularInline):
     model = SensorPlot
