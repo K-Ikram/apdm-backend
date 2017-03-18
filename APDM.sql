@@ -7,10 +7,7 @@ use apdm;
 
 create table client(
 client_id int auto_increment,
-name varchar(50) not null,
-surname varchar(50) not null,
 gender enum('homme','femme'),
-email varchar(50) not null,
 phone_contact varchar(50) not null,
 phone_sms varchar(50) not null,
 language varchar(50),
