@@ -18,6 +18,7 @@ class City(models.Model):
 
 class Client(AbstractUser):
     client_id = models.AutoField(primary_key=True)
+
     #name = models.CharField(max_length=50)
     #surname = models.CharField(max_length=50)
     gender = models.CharField(max_length=5, blank=True, null=True)
@@ -30,6 +31,12 @@ class Client(AbstractUser):
         #managed = False
         #db_table = 'client'
     
+
+    gender = models.CharField(max_length=5, blank=True, null=True)
+    phone_contact = models.CharField(max_length=50)
+    phone_sms = models.CharField(max_length=50)
+    language = models.CharField(max_length=50, blank=True, null=True)
+    comments = models.CharField(max_length=100, blank=True, null=True)    
 
 class Farm(models.Model):
     farm_id = models.AutoField(primary_key=True)

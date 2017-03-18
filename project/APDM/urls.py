@@ -5,7 +5,11 @@ from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = [
     url(r'^farms/$', FarmList.as_view()),
+
     url(r'^farm/(?P<pk>[0-9]+)$', FarmDetail.as_view()),       
+
+    url(r'^farms/(?P<pk>[0-9]+)$', FarmDetail.as_view()),       
+
     url(r'^farmsbyclient/(?P<client>[0-9]+)$', FarmsByClient.as_view()),
        
     url(r'^plots/$', PlotList.as_view()),
@@ -17,12 +21,14 @@ urlpatterns = [
     url(r'^cropproductionsbyplot/(?P<plot>[0-9]+)$', CropProductionsByPlot.as_view()),
 
     url(r'^diseasesbycropproduction/(?P<pk>[0-9]+)$', DiseasesByCropProduction.as_view()),
+
   
     url(r'^alertsbycropproduction/(?P<idCropProd>[0-9]+)$', AlertByCropProduction.as_view()),
        
 #    url(r'^riskratesbycropproduction/(?P<pk>[0-9]+)$', RiskRatesByCropProduction.as_view()),
     url(r'^client/(?P<pk>[0-9]+)$', ClientDetail.as_view()),       
    
+
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

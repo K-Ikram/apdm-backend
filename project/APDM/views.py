@@ -7,13 +7,14 @@ from serializers import *
 from rest_framework import mixins
 from rest_framework import generics
 
-# Create your views here.
+
 class PlotList(generics.ListCreateAPIView):
     
     queryset = Plot.objects.all()
     serializer_class = PlotSerializer
     
    
+
 class PlotsByFarm(APIView):
     
     def get_plots_by_farm_ID(self, farm):
@@ -27,25 +28,31 @@ class PlotsByFarm(APIView):
         serializer = PlotSerializer(plots, many= True)
         return Response(serializer.data)
 
+
 class PlotDetail(generics.RetrieveUpdateDestroyAPIView):
+
     
     queryset = Plot.objects.all()
     serializer_class = PlotSerializer
 
+
    
 class FarmList(generics.ListCreateAPIView):
-    
+
+ 
     queryset = Farm.objects.all()
     serializer_class = FarmSerializer
     
+
  
     
 class FarmDetail(generics.RetrieveUpdateDestroyAPIView):
+
     
     queryset = Farm.objects.all()
     serializer_class = FarmSerializer
 
-   
+1
 
 class FarmsByClient(APIView):
     
@@ -60,20 +67,19 @@ class FarmsByClient(APIView):
         serializer = FarmSerializer(farms, many= True)
         return Response(serializer.data)
 
+
 class CropProductionList(generics.ListCreateAPIView):
-    
-    queryset = CropProduction.objects.all()
-    serializer_class = CropProductionSerializer
-    
-    
-        
-class CropProductionDetail(generics.RetrieveUpdateDestroyAPIView):
+
     
     queryset = CropProduction.objects.all()
     serializer_class = CropProductionSerializer
 
-    
-    
+        
+class CropProductionDetail(generics.RetrieveUpdateDestroyAPIView):
+
+    queryset = CropProduction.objects.all()
+    serializer_class = CropProductionSerializer
+
 class CropProductionsByPlot(APIView):
     
     def get_crop_productions_by_plot_ID(self, plot):
@@ -145,9 +151,6 @@ class ClientDetail(generics.RetrieveAPIView):
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
     
-
-
-
 
 
 
