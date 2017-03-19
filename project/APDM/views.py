@@ -6,6 +6,9 @@ from models import *
 from serializers import *
 from rest_framework import mixins
 from rest_framework import generics
+from permissions import IsOwnerOrReadOnly
+import datetime
+
 
 
 class PlotList(generics.ListCreateAPIView):
@@ -14,6 +17,10 @@ class PlotList(generics.ListCreateAPIView):
     serializer_class = PlotSerializer
     
    
+class AlertList(generics.ListCreateAPIView):
+    
+    queryset = Alert.objects.all()
+    serializer_class = AlertSerializer
 
 class PlotsByFarm(APIView):
     
@@ -152,12 +159,30 @@ class ClientDetail(generics.RetrieveAPIView):
     
 
 
+class ConfirmAlert(generics.RetrieveUpdateAPIView):
+    
+    queryset = Alert.objects.all()
+    serializer_class = AlertSerializer
+    lookup_field = 'alert_id'
+    lookup_url_kwarg = 'alert_id'
+   
+    def perform_update(self, serializer):
+        serializer.save(client=self.request.user)
+       
+        
 
+    def put(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.alert_confirmed = 1
+        instance.feedback_date = datetime.datetime.now().replace(microsecond=0)
+        instance.client=request.user
+        instance.save()
+       
+        serializer = self.get_serializer(instance,data=instance)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
 
-
-
-
-
+        return Response(serializer.data)
 
 
 

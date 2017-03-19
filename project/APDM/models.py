@@ -141,6 +141,9 @@ class Alert(models.Model):
     feedback_treated = models.IntegerField(blank=True, null=True)
     feedback_date = models.DateField(blank=True, null=True)
     alert_confirmed = models.IntegerField(blank=True, null=True)
+    alert_denied = models.IntegerField(blank=True, null=True)
+  
+    #alert_denied= models.IntegerField(blank=True, null=True)
     client = models.ForeignKey(settings.AUTH_USER_MODEL,blank=True, null=True)
 
     class Meta:

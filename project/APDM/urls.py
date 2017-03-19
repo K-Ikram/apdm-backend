@@ -27,6 +27,8 @@ urlpatterns = [
        
 #    url(r'^riskratesbycropproduction/(?P<pk>[0-9]+)$', RiskRatesByCropProduction.as_view()),
     url(r'^client/(?P<pk>[0-9]+)$', ClientDetail.as_view()),       
+    url(r'^alerts/(?P<alert_id>[0-9]+)/confirm', ConfirmAlert.as_view()),       
+    url(r'^alerts/$', AlertList.as_view()),       
    
 
 ]
