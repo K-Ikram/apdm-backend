@@ -36,7 +36,7 @@ class AlertSerializer(serializers.ModelSerializer):
         model = Alert
         fields = '__all__'
         partial=True
-        #read_only_fields = ('pk', 'department')
+        read_only_fields = ('pk', 'department')
 
 
 
@@ -47,8 +47,11 @@ class ClientSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-
-
-
+class AnomalySerializer(serializers.ModelSerializer):
+    #clients = ClientSerializer(many=True)
+    class Meta:
+        model = Anomaly
+        fields = '__all__'
+       
 
 

@@ -187,3 +187,55 @@ class ConfirmAlert(generics.RetrieveUpdateAPIView):
 
 
 
+class DenyAlert(generics.RetrieveUpdateAPIView):
+    
+    queryset = Alert.objects.all()
+    serializer_class = AlertSerializer
+    lookup_field = 'alert_id'
+    lookup_url_kwarg = 'alert_id'
+   
+    def perform_update(self, serializer):
+        serializer.save(client=self.request.user)
+       
+        
+
+    def put(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.alert_denied = 1
+        instance.feedback_date = datetime.datetime.now().replace(microsecond=0)
+        instance.client=request.user
+        instance.save()
+       
+        serializer = self.get_serializer(instance,data=instance)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data)
+
+#class AnomalyList(generics.ListCreateAPIView):
+#    queryset = Anomaly.objects.all()
+#    serializer_class = AnomalySerializer
+#    
+#    def post(self, request, *args, **kwargs):
+#        
+##        instance.alert_denied = 1
+##        instance.feedback_date = datetime.datetime.now().replace(microsecond=0)
+##        instance.client=request.user
+##        instance.save()
+#        
+#       # instance.occurence_date=request.occurence_date
+#        request.reporting_date=datetime.datetime.now().replace(microsecond=0)
+##        instance.client=request.user
+##        instance.crop_production=request.crop_production
+##        instance.disease=request.disease
+#        serializer = AnomalySerializer(data=request.data)
+#        
+#        
+#        serializer.is_valid(raise_exception=True)
+#        self.perform_update(serializer)
+#
+#        return Response(serializer.data)
+#    
+    
+    
+    
