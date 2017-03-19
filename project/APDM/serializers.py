@@ -31,17 +31,15 @@ class FarmSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class AlertSerializer(serializers.ModelSerializer):
-    #clients = ClientSerializer(many=True)
     class Meta:
         model = Alert
         fields = '__all__'
         partial=True
-        read_only_fields = ('pk', 'department')
+#        read_only_fields = ('pk', 'department')
 
 
 
 class ClientSerializer(serializers.ModelSerializer):
-    #clients = ClientSerializer(many=True)
     class Meta:
         model = Client
         fields = '__all__'

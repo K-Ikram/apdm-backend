@@ -4,18 +4,43 @@ from rest_framework.decorators import APIView
 from rest_framework.response import Response
 from models import *
 from serializers import *
-from rest_framework import mixins
-from rest_framework import generics
-from permissions import IsOwnerOrReadOnly
+from rest_framework import permissions
+from rest_framework import generics, mixins
 import datetime
+from oauth2_provider.models import AccessToken, Application
+from oauth2_provider.ext.rest_framework import TokenHasReadWriteScope, TokenHasScope
+from oauth2_provider.views.generic import ProtectedResourceView
+from django.http import HttpResponse
 
+class FarmList(APIView):
+ 
+    def get_farms(self, user):
+        try:
+            return Farm.objects.filter(clients=user)
+        except Farm.DoesNotExist:
+            raise Farm.DoesNotExist
 
+    def get_user(self, token):
+        # get the token object with token = token and expiration_date > current date
+            token = AccessToken.objects.filter(expires__gt=datetime.datetime.now().replace(microsecond=0),token=token)
+            if not token :
+                return None
+            else:
+                return list(token)[0].user_id
+            
+    def get(self, request, format=None):
+        header = self.request.META.get('HTTP_AUTHORIZATION', None)
+        token = header.split()[1]        # get the token part of the <Beamer token> header
+        user= self.get_user(token=token) # get the user associated to this token
+        farms= self.get_farms(user=user) # get the farms owned by this user
+        serializer = FarmSerializer(farms, many=True)
 
-class PlotList(generics.ListCreateAPIView):
+        return Response(serializer.data)
     
+    
+class PlotList(generics.ListCreateAPIView):
     queryset = Plot.objects.all()
     serializer_class = PlotSerializer
-    
    
 class AlertList(generics.ListCreateAPIView):
     
@@ -41,16 +66,6 @@ class PlotDetail(generics.RetrieveUpdateDestroyAPIView):
     
     queryset = Plot.objects.all()
     serializer_class = PlotSerializer
-
-
-   
-class FarmList(generics.ListCreateAPIView):
-
- 
-    queryset = Farm.objects.all()
-    serializer_class = FarmSerializer
-    
-
  
     
 class FarmDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -193,9 +208,20 @@ class DenyAlert(generics.RetrieveUpdateAPIView):
     lookup_url_kwarg = 'alert_id'
    
     def perform_update(self, serializer):
-        serializer.save(client=self.request.user) # get the token and its user
-       
+        header = self.request.META.get('HTTP_AUTHORIZATION', None) # get header from the request metadata
+        token = header.split()[1]        # get the token part of the <Beamer token> header
+        user= self.get_user(token=token) # get the user associated to this token
         
+        serializer.save(client=user)
+       
+    def get_user(self, token):
+        # get the token object with token = token and expiration_date > current date
+        token = AccessToken.objects.filter(expires__gt=datetime.datetime.now().replace(microsecond=0),token=token)
+        if not token :
+            return None
+        else:
+            return list(token)[0].user_id
+     
 
     def put(self, request, *args, **kwargs):
         instance = self.get_object()

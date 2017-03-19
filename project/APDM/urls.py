@@ -8,8 +8,6 @@ urlpatterns = [
 
     url(r'^farm/(?P<pk>[0-9]+)$', FarmDetail.as_view()),       
 
-    url(r'^farms/(?P<pk>[0-9]+)$', FarmDetail.as_view()),       
-
     url(r'^farmsbyclient/(?P<client>[0-9]+)$', FarmsByClient.as_view()),
        
     url(r'^plots/$', PlotList.as_view()),
@@ -31,8 +29,6 @@ urlpatterns = [
     url(r'^alerts/(?P<alert_id>[0-9]+)/deny', DenyAlert.as_view()), 
     url(r'^alerts/$', AlertList.as_view()),       
 #    url(r'^anomalies/$', AnomalyList.as_view()),       
-   
-
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

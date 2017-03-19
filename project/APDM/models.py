@@ -18,7 +18,6 @@ class City(models.Model):
 
 class Client(AbstractUser):
     client_id = models.AutoField(primary_key=True)
-
     #name = models.CharField(max_length=50)
     #surname = models.CharField(max_length=50)
     gender = models.CharField(max_length=5, blank=True, null=True)
@@ -149,8 +148,8 @@ class Alert(models.Model):
     class Meta:
         managed = False
         db_table = 'alert'
-    def __unicode__(self):
-        return self.date
+#    def __unicode__(self):
+#        return self.alert_date
 
 
 class Anomaly(models.Model):
