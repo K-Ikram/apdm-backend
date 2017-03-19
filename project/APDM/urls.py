@@ -30,7 +30,7 @@ urlpatterns = [
     url(r'^alerts/(?P<alert_id>[0-9]+)/confirm', ConfirmAlert.as_view()),  
     url(r'^alerts/(?P<alert_id>[0-9]+)/deny', DenyAlert.as_view()), 
     url(r'^alerts/$', AlertList.as_view()),       
-    url(r'^anomalies/$', AnomalyList.as_view()),       
+#    url(r'^anomalies/$', AnomalyList.as_view()),       
    
 
 ]

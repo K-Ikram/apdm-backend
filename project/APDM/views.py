@@ -167,9 +167,7 @@ class ConfirmAlert(generics.RetrieveUpdateAPIView):
     lookup_url_kwarg = 'alert_id'
    
     def perform_update(self, serializer):
-        serializer.save(client=self.request.user)
-       
-        
+        serializer.save(client=self.request.user)    
 
     def put(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -195,7 +193,7 @@ class DenyAlert(generics.RetrieveUpdateAPIView):
     lookup_url_kwarg = 'alert_id'
    
     def perform_update(self, serializer):
-        serializer.save(client=self.request.user)
+        serializer.save(client=self.request.user) # get the token and its user
        
         
 
@@ -237,5 +235,5 @@ class DenyAlert(generics.RetrieveUpdateAPIView):
 #        return Response(serializer.data)
 #    
     
-    
+
     
