@@ -11,6 +11,7 @@ from oauth2_provider.models import AccessToken, Application
 from oauth2_provider.ext.rest_framework import TokenHasReadWriteScope, TokenHasScope
 from oauth2_provider.views.generic import ProtectedResourceView
 from django.http import HttpResponse
+from rest_framework import status
 
 class FarmList(APIView):
  
@@ -20,25 +21,17 @@ class FarmList(APIView):
         except Farm.DoesNotExist:
             raise Farm.DoesNotExist
 
-    def get_user(self, token):
-        # get the token object with token = token and expiration_date > current date
-            token = AccessToken.objects.filter(expires__gt=datetime.datetime.now().replace(microsecond=0),token=token)
-            if not token :
-                return None
-            else:
-                return list(token)[0].user_id
+  
             
     def get(self, request, format=None):
-        header = self.request.META.get('HTTP_AUTHORIZATION', None)
-        token = header.split()[1]        # get the token part of the <Beamer token> header
-        user= self.get_user(token=token) # get the user associated to this token
-        farms= self.get_farms(user=user) # get the farms owned by this user
+        farms= self.get_farms(user=request.user) # get the farms owned by this user
         serializer = FarmSerializer(farms, many=True)
 
         return Response(serializer.data)
     
-    
+
 class PlotList(generics.ListCreateAPIView):
+
     queryset = Plot.objects.all()
     serializer_class = PlotSerializer
    
@@ -74,19 +67,19 @@ class FarmDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Farm.objects.all()
     serializer_class = FarmSerializer
 
-
-class FarmsByClient(APIView):
-    
-    def get_farms_by_user_ID(self, client):
-        try:
-            return list(Farm.objects.filter(clients=client))
-        except Farm.DoesNotExist:
-            raise Http404
-
-    def get(self, request, client, format=None):
-        farms = self.get_farms_by_user_ID(client)
-        serializer = FarmSerializer(farms, many= True)
-        return Response(serializer.data)
+#
+#class FarmsByClient(APIView):
+#    
+#    def get_farms_by_user_ID(self, client):
+#        try:
+#            return list(Farm.objects.filter(clients=client))
+#        except Farm.DoesNotExist:
+#            raise Http404
+#
+#    def get(self, request, client, format=None):
+#        farms = self.get_farms_by_user_ID(client)
+#        serializer = FarmSerializer(farms, many= True)
+#        return Response(serializer.data)
 
 
 class CropProductionList(generics.ListCreateAPIView):
@@ -168,7 +161,8 @@ class AlertByCropProduction(APIView):
         serializer = AlertSerializer(alerts, many= True)
         return Response(serializer.data) 
     
-class ClientDetail(generics.RetrieveAPIView):
+class UpdateProfile(generics.RetrieveUpdateAPIView):
+    
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
     
@@ -186,7 +180,7 @@ class ConfirmAlert(generics.RetrieveUpdateAPIView):
 
     def put(self, request, *args, **kwargs):
         instance = self.get_object()
-        instance.alert_confirmed = 1
+        instance.feedback_type = "confirmed"
         instance.feedback_date = datetime.datetime.now().replace(microsecond=0)
         instance.client=request.user
         instance.save()
@@ -206,26 +200,11 @@ class DenyAlert(generics.RetrieveUpdateAPIView):
     serializer_class = AlertSerializer
     lookup_field = 'alert_id'
     lookup_url_kwarg = 'alert_id'
-   
-    def perform_update(self, serializer):
-        header = self.request.META.get('HTTP_AUTHORIZATION', None) # get header from the request metadata
-        token = header.split()[1]        # get the token part of the <Beamer token> header
-        user= self.get_user(token=token) # get the user associated to this token
-        
-        serializer.save(client=user)
-       
-    def get_user(self, token):
-        # get the token object with token = token and expiration_date > current date
-        token = AccessToken.objects.filter(expires__gt=datetime.datetime.now().replace(microsecond=0),token=token)
-        if not token :
-            return None
-        else:
-            return list(token)[0].user_id
      
 
     def put(self, request, *args, **kwargs):
         instance = self.get_object()
-        instance.alert_denied = 1
+        instance.feedback_type = "denied"
         instance.feedback_date = datetime.datetime.now().replace(microsecond=0)
         instance.client=request.user
         instance.save()
@@ -236,30 +215,63 @@ class DenyAlert(generics.RetrieveUpdateAPIView):
 
         return Response(serializer.data)
 
-#class AnomalyList(generics.ListCreateAPIView):
-#    queryset = Anomaly.objects.all()
-#    serializer_class = AnomalySerializer
-#    
-#    def post(self, request, *args, **kwargs):
-#        
-##        instance.alert_denied = 1
-##        instance.feedback_date = datetime.datetime.now().replace(microsecond=0)
-##        instance.client=request.user
-##        instance.save()
-#        
-#       # instance.occurence_date=request.occurence_date
-#        request.reporting_date=datetime.datetime.now().replace(microsecond=0)
-##        instance.client=request.user
-##        instance.crop_production=request.crop_production
-##        instance.disease=request.disease
-#        serializer = AnomalySerializer(data=request.data)
-#        
-#        
-#        serializer.is_valid(raise_exception=True)
-#        self.perform_update(serializer)
-#
-#        return Response(serializer.data)
-#    
+
+class CurrentClient(APIView): 
+     
+     
+     def get_client(self, user):
+        try:
+            return Client.objects.filter(client_id=user)
+        except Client.DoesNotExist:
+            raise Client.DoesNotExist
+
+            
+     def get(self, request, format=None):
+        client= self.get_client(user=request.user.client_id)
+        serializer = ClientSerializer(client,many=True)
+
+        return Response(serializer.data)
+   
+
+
+class AddAnomaly(generics.ListCreateAPIView):
+    queryset = Anomaly.objects.all()
+    serializer_class = AnomalySerializer
+    
+    def perform_create(self, serializer):
+        serializer.save(client=self.request.user, reporting_date=datetime.datetime.now().replace(microsecond=0) )
+
+class ChangePasswordView(generics.UpdateAPIView):
+    """
+    An endpoint for changing password.
+    """
+    serializer_class = ChangePasswordSerializer
+    model = Client
+    #permission_classes = (IsAuthenticated,)
+
+    def get_object(self, queryset=None):
+        obj = self.request.user
+        return obj
+
+    def update(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            # Check old password
+            if not self.object.check_password(serializer.data.get("old_password")):
+                return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
+            # set_password also hashes the password that the user will get
+            self.object.set_password(serializer.data.get("new_password"))
+            self.object.save()
+            return Response("Success.", status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
     
 
     
