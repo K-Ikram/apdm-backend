@@ -13,11 +13,6 @@ class PlotSerializer(serializers.ModelSerializer):
         model = Plot
         fields = '__all__'
 
-class PredictionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FhbPredictions
-        fields = '__all__'
-
 class CropProductionSerializer(serializers.ModelSerializer):
     class Meta:
         model = CropProduction
@@ -45,13 +40,15 @@ class ClientSerializer(serializers.ModelSerializer):
         fields = ('client_id','phone_contact', 'phone_sms', 'email', 'first_name', 'last_name','username')
          
 
-
 class AnomalySerializer(serializers.ModelSerializer):
-    #clients = ClientSerializer(many=True)
     class Meta:
         model = Anomaly
         fields = '__all__'
-       
+
+class RiskRateSerializer(serializers.Serializer):
+    risk_rate= serializers.FloatField()
+    prediction_date = serializers.DateTimeField()
+
 class ChangePasswordSerializer(serializers.Serializer):
     """
     Serializer for password change endpoint.

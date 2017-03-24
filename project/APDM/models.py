@@ -151,18 +151,17 @@ class Alert(models.Model):
 
 class Anomaly(models.Model):
     anomaly_id = models.AutoField(primary_key=True)
-    occurence_date = models.DateTimeField()
+    occurence_date = models.DateField()
     reporting_date = models.DateTimeField(blank=True, null=True)
     client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     crop_production = models.ForeignKey('CropProduction')
     disease = models.ForeignKey('Disease')
-    treated = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'anomaly'
-    def __unicode__(self):
-        return self.occurence_date
+#    def __unicode__(self):
+#        return self.occurence_date
 
 
 class DjangoMigrations(models.Model):
@@ -173,22 +172,3 @@ class DjangoMigrations(models.Model):
     class Meta:
         managed = False
         db_table = 'django_migrations'
-
-
-class FhbPredictions(models.Model):
-    prediction_id = models.AutoField(primary_key=True)
-    prediction_date = models.DateTimeField()
-    crop_production_id = models.IntegerField()
-    temp_duration = models.FloatField()
-    humidity_avg = models.FloatField()
-    rainfall_duration = models.FloatField()
-    class_field = models.CharField(db_column='class', max_length=10)  # Field renamed because it was a Python reserved word.
-    risk_rate = models.FloatField()
-
-    class Meta:
-        managed = False
-        db_table = 'fhb_predictions'
-
-    def __unicode__(self):
-        return self.prediction_date
-

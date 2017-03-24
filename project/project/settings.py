@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'APDM',
     'rest_framework',
     'oauth2_provider',
+    'corsheaders',
     
 
 ]

@@ -12,7 +12,8 @@ from oauth2_provider.ext.rest_framework import TokenHasReadWriteScope, TokenHasS
 from oauth2_provider.views.generic import ProtectedResourceView
 from django.http import HttpResponse
 from rest_framework import status
-
+from mongodb import *
+import math
 class FarmList(APIView):
  
     def get_farms(self, user):
@@ -119,20 +120,6 @@ class DiseasesByCropProduction(APIView):
         
         serializer = DiseaseSerializer(crop_production.diseases, many= True)
         return Response(serializer.data)    
-    
-class RiskRatesByCropProduction(APIView):
-    def get_predictions_by_crop_production(self, pk):
-        try:
-            return list(FhbPredictions.objects.filter(crop_production_id=pk))
-        except FhbPredictions.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk, format=None):
-        predictions = self.get_predictions_by_crop_production(pk)
-        
-        serializer = PredictionSerializer(predictions, many= True)
-        return Response(serializer.data)    
-
 
 class CropProductionsByPlot(APIView):
     
@@ -174,7 +161,10 @@ class ConfirmAlert(generics.RetrieveUpdateAPIView):
     serializer_class = AlertSerializer
     lookup_field = 'alert_id'
     lookup_url_kwarg = 'alert_id'
-   
+
+    dataset_col = TrainingSetCollection()
+    prediction_col = PredictionCollection()
+
     def perform_update(self, serializer):
         serializer.save(client=self.request.user)    
 
@@ -184,14 +174,22 @@ class ConfirmAlert(generics.RetrieveUpdateAPIView):
         instance.feedback_date = datetime.datetime.now().replace(microsecond=0)
         instance.client=request.user
         instance.save()
-       
+        # start update training set
+        prediction_date = instance.alert_date.replace(minute=0,second=0,microsecond=0)
+        prediction = self.prediction_col.getPrediction(instance.crop_production_id,prediction_date)
+        if prediction is not None:
+            if (prediction["disease"] == "fusarium of wheat"):
+                self.dataset_col.addToFHBTrainingSet(prediction)
+            else:
+                pass # another disease
+            rewardNeighbors(self.dataset_col,self.prediction_col,prediction["_id"])
+        # end update training set
+
         serializer = self.get_serializer(instance,data=instance)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
         return Response(serializer.data)
-
-
 
 
 class DenyAlert(generics.RetrieveUpdateAPIView):
@@ -201,6 +199,8 @@ class DenyAlert(generics.RetrieveUpdateAPIView):
     lookup_field = 'alert_id'
     lookup_url_kwarg = 'alert_id'
      
+    dataset_col = TrainingSetCollection()
+    prediction_col = PredictionCollection()
 
     def put(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -208,10 +208,19 @@ class DenyAlert(generics.RetrieveUpdateAPIView):
         instance.feedback_date = datetime.datetime.now().replace(microsecond=0)
         instance.client=request.user
         instance.save()
-       
+
+        # start update training set
+        prediction_date = instance.alert_date.replace(minute=0,second=0,microsecond=0)
+        prediction = self.prediction_col.getPrediction(instance.crop_production_id,prediction_date)
+        if prediction is not None:
+            penalizeNeighbors(self.dataset_col,self.prediction_col,prediction["_id"])
+        # end update training set
+
+      
         serializer = self.get_serializer(instance,data=instance)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
+        self.update_predictor()
 
         return Response(serializer.data)
 
@@ -237,9 +246,21 @@ class CurrentClient(APIView):
 class AddAnomaly(generics.ListCreateAPIView):
     queryset = Anomaly.objects.all()
     serializer_class = AnomalySerializer
+    dataset_col = TrainingSetCollection()
+    prediction_col = PredictionCollection()
     
     def perform_create(self, serializer):
+
         serializer.save(client=self.request.user, reporting_date=datetime.datetime.now().replace(microsecond=0) )
+        # start update training set
+        dt = datetime.datetime.strptime(serializer.data['occurence_date'], '%Y-%m-%d')
+        prediction = self.prediction_col.getPrediction(serializer.data['crop_production'],dt)
+        if prediction is not None:
+            penalizeNeighbors(self.dataset_col,self.prediction_col,prediction["_id"])
+        else:
+            print "none"
+        # end update training set
+
 
 class ChangePasswordView(generics.UpdateAPIView):
     """
@@ -266,12 +287,32 @@ class ChangePasswordView(generics.UpdateAPIView):
             self.object.save()
             return Response("Success.", status=status.HTTP_200_OK)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)   
+        
 
-
-
-
-
+class RiskRates(APIView):
+    prediction_col = PredictionCollection()
     
+    def get(self, request, crop, disease, format=None):
+        predictions = self.prediction_col.getRiskRates(int(crop), int(disease))
+        serializer = RiskRateSerializer(predictions, many= True)
+        return Response(serializer.data)
 
+
+def rewardNeighbors(dataset_col,prediction_col,prediction_id): 
+
+    neighbors = prediction_col.getPredictionNeighbours(prediction_id)
+    for neighbor in neighbors:
+        old_weight = dataset_col.getTrainingSetElementByID(neighbor)["weight"]
+        new_weight = 2- math.pow(old_weight-2,2)/2
+        print old_weight, new_weight
+        dataset_col.updateTrainingSetElementWeight(neighbor, new_weight)
+        
     
+def penalizeNeighbors(dataset_col,prediction_col,prediction_id):    
+    neighbors = prediction_col.getPredictionNeighbours(prediction_id)
+    for neighbor in neighbors:
+        old_weight = dataset_col.getTrainingSetElementByID(neighbor)["weight"]
+        new_weight = math.pow(old_weight,2)/2
+        print old_weight, new_weight
+        dataset_col.updateTrainingSetElementWeight(neighbor, new_weight)
