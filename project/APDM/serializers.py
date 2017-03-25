@@ -46,6 +46,8 @@ class AnomalySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class RiskRateSerializer(serializers.Serializer):
+    crop_production = serializers.IntegerField()
+    disease = serializers.IntegerField()
     risk_rate= serializers.FloatField()
     prediction_date = serializers.DateTimeField()
 
