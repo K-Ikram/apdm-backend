@@ -81,7 +81,7 @@ primary key(disease_id)
 
 create table anomaly(
 anomaly_id int auto_increment,
-occurence_date datetime not null,
+occurence_date date not null,
 reporting_date datetime not null,
 client_id int not null,
 crop_production_id int not null,
@@ -134,41 +134,6 @@ foreign key(disease_id) references disease(disease_id)
 -- sensor_id int not null references sensor(sensor_id),
 -- primary key(crop_production_id,sensor_id)
 -- );
-
-
-CREATE TABLE  fhb_training_set
-(
-  training_set_id int NOT NULL AUTO_INCREMENT,
-  temp_duration float  NOT NULL , # durée de temperature entre 9 et 30 °C durant une semaine avant le jour de prévision
-  humidity_avg float NOT NULL,  # moyenne de l'humidité relative durant une semaine avant le jour de prévision
-  rainfall_duration float NOT NULL, # durée des précipitations durant une semaine avant le jour de prévision
-  weight float DEFAULT 1,
-  class varchar(10) NOT NULL,
-  primary key(training_set_id)
-);
-CREATE TABLE  fhb_predictions
-(
-  prediction_id int NOT NULL AUTO_INCREMENT,
-
-  prediction_date timestamp not null,
-  crop_production_id int not null,
-  temp_duration float  NOT NULL , # durée de temperature entre 9 et 30 °C durant une semaine avant le jour de prévision
-  humidity_avg float NOT NULL,  # moyenne de l'humidité relative durant une semaine avant le jour de prévision
-  rainfall_duration float NOT NULL, # durée des précipitations durant une semaine avant le jour de prévision
-  class VARCHAR(10) NOT NULL,
-  risk_rate float NOT NULL,
-
-  primary key(prediction_id),
-  foreign key(crop_production_id) references crop_production(crop_production_id)
-
-);
-
-CREATE TABLE fhb_neighborhood
-(
-  prediction_id int NOT NULL references fhb_predictions(prediction_id),
-  training_set_id int not null references fhb_training_set(training_set_id),
-  primary key(prediction_id, training_set_id)
-);
 
 INSERT INTO `sensor` (`sensor_id`, `sensor_type`, `sensor_unit`) VALUES (NULL, 'humidity', '%');
 INSERT INTO `sensor` (`sensor_id`, `sensor_type`, `sensor_unit`) VALUES (NULL, 'humidity', '%');

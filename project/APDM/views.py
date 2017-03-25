@@ -68,24 +68,8 @@ class FarmDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Farm.objects.all()
     serializer_class = FarmSerializer
 
-#
-#class FarmsByClient(APIView):
-#    
-#    def get_farms_by_user_ID(self, client):
-#        try:
-#            return list(Farm.objects.filter(clients=client))
-#        except Farm.DoesNotExist:
-#            raise Http404
-#
-#    def get(self, request, client, format=None):
-#        farms = self.get_farms_by_user_ID(client)
-#        serializer = FarmSerializer(farms, many= True)
-#        return Response(serializer.data)
-
-
 class CropProductionList(generics.ListCreateAPIView):
 
-    
     queryset = CropProduction.objects.all()
     serializer_class = CropProductionSerializer
 
@@ -154,7 +138,6 @@ class UpdateProfile(generics.RetrieveUpdateAPIView):
     serializer_class = ClientSerializer
     
 
-
 class ConfirmAlert(generics.RetrieveUpdateAPIView):
     
     queryset = Alert.objects.all()
@@ -174,11 +157,12 @@ class ConfirmAlert(generics.RetrieveUpdateAPIView):
         instance.feedback_date = datetime.datetime.now().replace(microsecond=0)
         instance.client=request.user
         instance.save()
+        
         # start update training set
         prediction_date = instance.alert_date.replace(minute=0,second=0,microsecond=0)
         prediction = self.prediction_col.getPrediction(instance.crop_production_id,prediction_date)
         if prediction is not None:
-            if (prediction["disease"] == "fusarium of wheat"):
+            if (prediction["disease"] == 1):
                 self.dataset_col.addToFHBTrainingSet(prediction)
             else:
                 pass # another disease
