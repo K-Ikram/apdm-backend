@@ -200,11 +200,9 @@ class DenyAlert(generics.RetrieveUpdateAPIView):
             penalizeNeighbors(self.dataset_col,self.prediction_col,prediction["_id"])
         # end update training set
 
-      
         serializer = self.get_serializer(instance,data=instance)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-        self.update_predictor()
 
         return Response(serializer.data)
 

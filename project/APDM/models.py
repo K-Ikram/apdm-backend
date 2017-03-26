@@ -18,19 +18,6 @@ class City(models.Model):
 
 class Client(AbstractUser):
     client_id = models.AutoField(primary_key=True)
-    #name = models.CharField(max_length=50)
-    #surname = models.CharField(max_length=50)
-    gender = models.CharField(max_length=5, blank=True, null=True)
-    #email = models.CharField(max_length=50)
-    phone_contact = models.CharField(max_length=50)
-    phone_sms = models.CharField(max_length=50)
-    language = models.CharField(max_length=50, blank=True, null=True)
-    comments = models.CharField(max_length=100, blank=True, null=True)
-    #class Meta:
-        #managed = False
-        #db_table = 'client'
-    
-
     gender = models.CharField(max_length=5, blank=True, null=True)
     phone_contact = models.CharField(max_length=50)
     phone_sms = models.CharField(max_length=50)
@@ -153,7 +140,7 @@ class Anomaly(models.Model):
     anomaly_id = models.AutoField(primary_key=True)
     occurence_date = models.DateField()
     reporting_date = models.DateTimeField(blank=True, null=True)
-    client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    client = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
     crop_production = models.ForeignKey('CropProduction')
     disease = models.ForeignKey('Disease')
 
