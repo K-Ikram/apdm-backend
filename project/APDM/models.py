@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.conf import settings 
+from django.conf import settings
 # Create your models here.
 
 
@@ -22,7 +22,7 @@ class Client(AbstractUser):
     phone_contact = models.CharField(max_length=50)
     phone_sms = models.CharField(max_length=50)
     language = models.CharField(max_length=50, blank=True, null=True)
-    comments = models.CharField(max_length=100, blank=True, null=True)    
+    comments = models.CharField(max_length=100, blank=True, null=True)
 
 class Farm(models.Model):
     farm_id = models.AutoField(primary_key=True)
@@ -40,7 +40,7 @@ class Farm(models.Model):
 class Ownfarm(models.Model):
     client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     farm = models.ForeignKey(Farm, on_delete=models.CASCADE)
-  
+
 
 class Disease(models.Model):
     disease_id = models.AutoField(primary_key=True)
@@ -50,13 +50,13 @@ class Disease(models.Model):
         managed = False
         db_table = 'disease'
     def __unicode__(self):
-        return self.disease_name 
-    
+        return self.disease_name
+
 class Sensor(models.Model):
     sensor_id = models.AutoField(primary_key=True)
     sensor_type = models.CharField(max_length=20)
     sensor_unit = models.CharField(max_length=20)
-    
+
     class Meta:
         managed = False
         db_table = 'sensor'
@@ -87,7 +87,7 @@ class SensorPlot(models.Model):
     sensor = models.ForeignKey('Sensor',on_delete=models.CASCADE)
     start_date = models.DateField()
     end_date = models.DateField(blank=True, null=True)
-    
+
 class CropProduction(models.Model):
     crop_production_id = models.AutoField(primary_key=True)
     crop = models.CharField(max_length=6, blank=True, null=True)
@@ -103,21 +103,21 @@ class CropProduction(models.Model):
     class Meta:
         managed = False
         db_table = 'crop_production'
-        
+
     def __unicode__(self):
         return self.name
-    
+
 
 class CropProductionDisease(models.Model):
     crop_production = models.ForeignKey(CropProduction, on_delete=models.CASCADE)
     disease = models.ForeignKey(Disease, on_delete=models.CASCADE)
- 
-    
+
+
 class CropProductionSensor(models.Model):
     crop_production = models.ForeignKey(CropProduction, on_delete=models.CASCADE)
     sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE )
-    
-    
+
+
 class Alert(models.Model):
     alert_id = models.AutoField(primary_key=True)
     alert_date = models.DateTimeField()
@@ -126,7 +126,7 @@ class Alert(models.Model):
     disease = models.ForeignKey(Disease, on_delete=models.CASCADE)
     feedback_date = models.DateTimeField(blank=True, null=True)
     feedback_type=models.CharField(max_length=15, blank=True, null=True)
-  
+
     client = models.ForeignKey(settings.AUTH_USER_MODEL,blank=True, null=True)
 
     class Meta:
@@ -138,7 +138,7 @@ class Alert(models.Model):
 
 class Anomaly(models.Model):
     anomaly_id = models.AutoField(primary_key=True)
-    occurence_date = models.DateField()
+    occurence_date = models.DateTimeField()
     reporting_date = models.DateTimeField(blank=True, null=True)
     client = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
     crop_production = models.ForeignKey('CropProduction')
@@ -150,7 +150,15 @@ class Anomaly(models.Model):
 #    def __unicode__(self):
 #        return self.occurence_date
 
+class CropClient(models.Model):
 
+    client  = models.ForeignKey('Client', on_delete=models.CASCADE, primary_key = True)
+    crop_production= models.ForeignKey('CropProduction', on_delete=models.CASCADE, primary_key = True)
+
+    class Meta:
+        managed = False
+        db_table = 'crop_client'
+        
 class DjangoMigrations(models.Model):
     app = models.CharField(max_length=255)
     name = models.CharField(max_length=255)

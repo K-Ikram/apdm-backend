@@ -14,35 +14,32 @@ from django.http import HttpResponse
 from rest_framework import status
 from mongodb import *
 import math
-class FarmList(APIView):
- 
+class FarmList(generics.ListCreateAPIView):
+
     def get_farms(self, user):
         try:
             return Farm.objects.filter(clients=user)
         except Farm.DoesNotExist:
             raise Farm.DoesNotExist
 
-  
-            
     def get(self, request, format=None):
         farms= self.get_farms(user=request.user) # get the farms owned by this user
         serializer = FarmSerializer(farms, many=True)
-
         return Response(serializer.data)
-    
+
 
 class PlotList(generics.ListCreateAPIView):
 
     queryset = Plot.objects.all()
     serializer_class = PlotSerializer
-   
+
 class AlertList(generics.ListCreateAPIView):
-    
+
     queryset = Alert.objects.all()
     serializer_class = AlertSerializer
 
 class PlotsByFarm(APIView):
-    
+
     def get_plots_by_farm_ID(self, farm):
         try:
             return list(Plot.objects.filter(farm=farm))
@@ -57,14 +54,14 @@ class PlotsByFarm(APIView):
 
 class PlotDetail(generics.RetrieveUpdateDestroyAPIView):
 
-    
+
     queryset = Plot.objects.all()
     serializer_class = PlotSerializer
- 
-    
+
+
 class FarmDetail(generics.RetrieveUpdateDestroyAPIView):
 
-    
+
     queryset = Farm.objects.all()
     serializer_class = FarmSerializer
 
@@ -73,40 +70,14 @@ class CropProductionList(generics.ListCreateAPIView):
     queryset = CropProduction.objects.all()
     serializer_class = CropProductionSerializer
 
-        
+
 class CropProductionDetail(generics.RetrieveUpdateDestroyAPIView):
 
     queryset = CropProduction.objects.all()
     serializer_class = CropProductionSerializer
 
 class CropProductionsByPlot(APIView):
-    
-    def get_crop_productions_by_plot_ID(self, plot):
-        try:
-            return list(CropProduction.objects.filter(plot=plot))
-        except CropProduction.DoesNotExist:
-            raise Http404
 
-    def get(self, request, plot, format=None):
-        crop_productions = self.get_crop_productions_by_plot_ID(plot)
-        serializer = CropProductionSerializer(crop_productions, many= True)
-        return Response(serializer.data)    
-
-class DiseasesByCropProduction(APIView):
-    def get_object(self, pk):
-        try:
-            return CropProduction.objects.get(pk=pk)
-        except CropProduction.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk, format=None):
-        crop_production = self.get_object(pk)
-        
-        serializer = DiseaseSerializer(crop_production.diseases, many= True)
-        return Response(serializer.data)    
-
-class CropProductionsByPlot(APIView):
-    
     def get_crop_productions_by_plot_ID(self, plot):
         try:
             return list(CropProduction.objects.filter(plot=plot))
@@ -117,10 +88,35 @@ class CropProductionsByPlot(APIView):
         crop_productions = self.get_crop_productions_by_plot_ID(plot)
         serializer = CropProductionSerializer(crop_productions, many= True)
         return Response(serializer.data)
-    
-    
+
+class DiseasesByCropProduction(APIView):
+    def get_object(self, pk):
+        try:
+            return CropProduction.objects.get(pk=pk)
+        except CropProduction.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        crop_production = self.get_object(pk)
+
+        serializer = DiseaseSerializer(crop_production.diseases, many= True)
+        return Response(serializer.data)
+
+class CropProductionsByPlot(APIView):
+
+    def get_crop_productions_by_plot_ID(self, plot):
+        try:
+            return list(CropProduction.objects.filter(plot=plot))
+        except CropProduction.DoesNotExist:
+            raise Http404
+
+    def get(self, request, plot, format=None):
+        crop_productions = self.get_crop_productions_by_plot_ID(plot)
+        serializer = CropProductionSerializer(crop_productions, many= True)
+        return Response(serializer.data)
+
+
 class AlertByCropProduction(APIView):
-    
     def get_alert_by_crop_production(self, idCropProd):
         try:
             return list(Alert.objects.filter(crop_production=idCropProd))
@@ -130,16 +126,15 @@ class AlertByCropProduction(APIView):
     def get(self, request,  idCropProd, format=None):
         alerts = self.get_alert_by_crop_production(idCropProd)
         serializer = AlertSerializer(alerts, many= True)
-        return Response(serializer.data) 
-    
+        return Response(serializer.data)
+
 class UpdateProfile(generics.RetrieveUpdateAPIView):
-    
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
-    
+
 
 class ConfirmAlert(generics.RetrieveUpdateAPIView):
-    
+
     queryset = Alert.objects.all()
     serializer_class = AlertSerializer
     lookup_field = 'alert_id'
@@ -149,7 +144,7 @@ class ConfirmAlert(generics.RetrieveUpdateAPIView):
     prediction_col = PredictionCollection()
 
     def perform_update(self, serializer):
-        serializer.save(client=self.request.user)    
+        serializer.save(client=self.request.user)
 
     def put(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -157,7 +152,7 @@ class ConfirmAlert(generics.RetrieveUpdateAPIView):
         instance.feedback_date = datetime.datetime.now().replace(microsecond=0)
         instance.client=request.user
         instance.save()
-        
+
         # start update training set
         prediction_date = instance.alert_date.replace(minute=0,second=0,microsecond=0)
         prediction = self.prediction_col.getPrediction(instance.crop_production_id,prediction_date)
@@ -177,12 +172,12 @@ class ConfirmAlert(generics.RetrieveUpdateAPIView):
 
 
 class DenyAlert(generics.RetrieveUpdateAPIView):
-    
+
     queryset = Alert.objects.all()
     serializer_class = AlertSerializer
     lookup_field = 'alert_id'
     lookup_url_kwarg = 'alert_id'
-     
+
     dataset_col = TrainingSetCollection()
     prediction_col = PredictionCollection()
 
@@ -207,35 +202,29 @@ class DenyAlert(generics.RetrieveUpdateAPIView):
         return Response(serializer.data)
 
 
-class CurrentClient(APIView): 
-     
-     
+class CurrentClient(APIView):
      def get_client(self, user):
         try:
-            return Client.objects.filter(client_id=user)
+            return Client.objects.filter(client_id=user).first()
         except Client.DoesNotExist:
             raise Client.DoesNotExist
 
-            
      def get(self, request, format=None):
         client= self.get_client(user=request.user.client_id)
-        serializer = ClientSerializer(client,many=True)
-
+        serializer = ClientSerializer(client)
         return Response(serializer.data)
-   
-
 
 class AddAnomaly(generics.ListCreateAPIView):
     queryset = Anomaly.objects.all()
     serializer_class = AnomalySerializer
     dataset_col = TrainingSetCollection()
     prediction_col = PredictionCollection()
-    
+
     def perform_create(self, serializer):
 
         serializer.save(client=self.request.user, reporting_date=datetime.datetime.now().replace(microsecond=0) )
         # start update training set
-        dt = datetime.datetime.strptime(serializer.data['occurence_date'], '%Y-%m-%d')
+        dt = datetime.datetime.strptime(serializer.data['occurence_date'], '%Y-%m-%dT%H:%M:%SZ')
         prediction = self.prediction_col.getPrediction(serializer.data['crop_production'],dt)
         if prediction is not None:
             penalizeNeighbors(self.dataset_col,self.prediction_col,prediction["_id"])
@@ -269,19 +258,49 @@ class ChangePasswordView(generics.UpdateAPIView):
             self.object.save()
             return Response("Success.", status=status.HTTP_200_OK)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)   
-        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class RiskRates(APIView):
     prediction_col = PredictionCollection()
-    
     def get(self, request, crop, disease, format=None):
         predictions = self.prediction_col.getRiskRates(int(crop), int(disease))
         serializer = RiskRateSerializer(predictions, many= True)
         return Response(serializer.data)
 
+class RiskRateByCrop(APIView):
+    prediction_col = PredictionCollection()
+    def get(self, request, crop, format=None):
+        dt = datetime.datetime.now()
+        predictions = self.prediction_col.getRiskRateByCrop(int(crop),dt)
+        serializer = RiskRateSerializer(predictions, many= True)
+        return Response(serializer.data)
 
-def rewardNeighbors(dataset_col,prediction_col,prediction_id): 
+class DiseaseDetail(generics.RetrieveAPIView):
+    queryset = Disease.objects.all()
+    serializer_class = DiseaseSerializer
+
+class CropProductionByClient(generics.ListAPIView):
+    def get_crop_productions_by_client_ID(self, user):
+        try:
+            crops=list(CropClient.objects.filter(client=user))
+
+            liste=[]
+            for crop in crops:
+
+                 liste.append(crop.crop_production.crop_production_id)
+            return list(CropProduction.objects.filter(crop_production_id__in =liste))
+        except CropClient.DoesNotExist:
+            raise Http404
+
+    def get(self, request, format=None):
+        crop_productions = self.get_crop_productions_by_client_ID(user=request.user)
+        print("==> crops",crop_productions)
+        serializer = CropProductionSerializer(crop_productions, many= True)
+        return Response(serializer.data)
+
+
+def rewardNeighbors(dataset_col,prediction_col,prediction_id):
 
     neighbors = prediction_col.getPredictionNeighbours(prediction_id)
     for neighbor in neighbors:
@@ -289,9 +308,9 @@ def rewardNeighbors(dataset_col,prediction_col,prediction_id):
         new_weight = 2- math.pow(old_weight-2,2)/2
         print old_weight, new_weight
         dataset_col.updateTrainingSetElementWeight(neighbor, new_weight)
-        
-    
-def penalizeNeighbors(dataset_col,prediction_col,prediction_id):    
+
+
+def penalizeNeighbors(dataset_col,prediction_col,prediction_id):
     neighbors = prediction_col.getPredictionNeighbours(prediction_id)
     for neighbor in neighbors:
         old_weight = dataset_col.getTrainingSetElementByID(neighbor)["weight"]

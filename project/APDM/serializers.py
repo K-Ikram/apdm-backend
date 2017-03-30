@@ -17,7 +17,7 @@ class CropProductionSerializer(serializers.ModelSerializer):
     class Meta:
         model = CropProduction
         fields = '__all__'
-        
+
 class FarmSerializer(serializers.ModelSerializer):
     #clients = ClientSerializer(many=True)
     class Meta:
@@ -32,13 +32,15 @@ class AlertSerializer(serializers.ModelSerializer):
         partial=True
 #        read_only_fields = ('pk', 'department')
 
-
-
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
-        fields = ('client_id','phone_contact', 'phone_sms', 'email', 'first_name', 'last_name','username')
-         
+        fields = ('client_id','gender','phone_contact', 'phone_sms', 'email', 'first_name', 'last_name','username','language','date_joined','is_staff','is_active','is_superuser','last_login')
+
+class CropClientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CropClient
+        fields =('client_id','crop_production_id')
 
 class AnomalySerializer(serializers.ModelSerializer):
     class Meta:
@@ -57,4 +59,3 @@ class ChangePasswordSerializer(serializers.Serializer):
     """
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
-

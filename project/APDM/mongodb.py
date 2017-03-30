@@ -16,13 +16,13 @@ class TrainingSetCollection(MongoConnection):
        self.get_collection('dataset')
 
     def getTrainingSetElementByID(self,element_id):
-        element = self.collection.find_one({"_id":ObjectId(element_id)})    
+        element = self.collection.find_one({"_id":ObjectId(element_id)})
         return element
 
     def addToFHBTrainingSet(self,prediction):
          result = self.collection.insert_one(
                  {
-                 "disease":"fusarium of wheat",
+                 "disease":1,
                  "temp_duration":prediction["temp_duration"],
                  "humidity_avg":prediction["humidity_avg"],
                  "rainfall_duration":prediction["rainfall_duration"],
@@ -32,8 +32,8 @@ class TrainingSetCollection(MongoConnection):
          return result
 
     def updateTrainingSetElementWeight(self,element_id, new_weight):
-        result = self.collection.update_one( 
-                {"_id": element_id}, 
+        result = self.collection.update_one(
+                {"_id": element_id},
                 {"$set": {"weight":new_weight}})
         return result
 
@@ -54,9 +54,17 @@ class PredictionCollection(MongoConnection):
         for doc in cursor:
             predictions.append(doc)
         return predictions
-        
+
+    def getRiskRateByCrop(self, crop_production, dt):
+        predictions = []
+        prediction_date = datetime.datetime(dt.year,dt.month,dt.day)
+        cursor = self.collection.find({"crop_production":crop_production, "prediction_date":prediction_date})
+        for doc in cursor:
+            predictions.append(doc)
+        return predictions
+
     def getPredictionByID(self,prediction_id):
-        prediction = self.collection.find_one({"_id":ObjectId(prediction_id)})   
+        prediction = self.collection.find_one({"_id":ObjectId(prediction_id)})
         return prediction
 
     def getPredictionNeighbours(self,predictionId):
