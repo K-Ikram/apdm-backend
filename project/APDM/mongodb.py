@@ -44,7 +44,7 @@ class PredictionCollection(MongoConnection):
 
 
     def getPrediction(self,cropProductionID, predictionDate):
-        dt = datetime.datetime(predictionDate.year,predictionDate.month,predictionDate.day)
+        dt = datetime.datetime(predictionDate.year,predictionDate.month,predictionDate.day,predictionDate.hour)
         prediction = self.collection.find_one({"crop_production":cropProductionID, "prediction_date":dt})
         return prediction
 
