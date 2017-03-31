@@ -272,9 +272,21 @@ class RiskRateByCrop(APIView):
     prediction_col = PredictionCollection()
     def get(self, request, crop, format=None):
         dt = datetime.datetime.now()
-        predictions = self.prediction_col.getRiskRateByCrop(int(crop),dt)
+        crop_production = CropProduction.objects.get(pk=crop)
+        serializer = DiseaseSerializer(crop_production.diseases, many = True)
+        dn =len(serializer.data)
+        predictions = self.prediction_col.getRiskRateByCrop(int(crop),dn)
         serializer = RiskRateSerializer(predictions, many= True)
         return Response(serializer.data)
+
+class CurrentRiskRate(APIView):
+    prediction_col = PredictionCollection()
+    def get(self, request, crop, disease,format=None):
+        dt = datetime.datetime.now()
+        prediction = self.prediction_col.getLastRiskRate(int(crop),int(disease))
+        serializer = RiskRateSerializer(prediction)
+        return Response(serializer.data)
+
 
 class DiseaseDetail(generics.RetrieveAPIView):
     queryset = Disease.objects.all()

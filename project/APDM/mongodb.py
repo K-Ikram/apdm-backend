@@ -55,10 +55,10 @@ class PredictionCollection(MongoConnection):
             predictions.append(doc)
         return predictions
 
-    def getRiskRateByCrop(self, crop_production, dt):
+    def getRiskRateByCrop(self, crop_production, dn):
         predictions = []
-        prediction_date = datetime.datetime(dt.year,dt.month,dt.day)
-        cursor = self.collection.find({"crop_production":crop_production, "prediction_date":prediction_date})
+        # prediction_date = datetime.datetime(dt.year,dt.month,dt.day)
+        cursor = self.collection.find({"crop_production":crop_production}).sort("prediction_date",-1).limit(dn)
         for doc in cursor:
             predictions.append(doc)
         return predictions

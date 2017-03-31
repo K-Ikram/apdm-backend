@@ -28,6 +28,7 @@ urlpatterns = [
 
     url(r'^riskrates/(?P<crop>[0-9]+)/(?P<disease>[0-9]+)$', RiskRates.as_view()),
     url(r'^riskratesbycrop/(?P<crop>[0-9]+)$', RiskRateByCrop.as_view()),
+
     url(r'^currentClient/', CurrentClient.as_view()),
     url(r'^updateProfile/(?P<pk>[0-9]+)$', UpdateProfile.as_view()),
     url(r'^changepswd/$', ChangePasswordView.as_view()),
