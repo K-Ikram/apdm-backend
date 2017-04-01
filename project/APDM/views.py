@@ -162,6 +162,8 @@ class ConfirmAlert(generics.RetrieveUpdateAPIView):
             else:
                 pass # another disease
             rewardNeighbors(self.dataset_col,self.prediction_col,prediction["_id"])
+        else:
+            print "there is no prediction associated to this confirmed alert"
         # end update training set
 
         serializer = self.get_serializer(instance,data=instance)
@@ -193,6 +195,8 @@ class DenyAlert(generics.RetrieveUpdateAPIView):
         prediction = self.prediction_col.getPrediction(instance.crop_production_id,prediction_date)
         if prediction is not None:
             penalizeNeighbors(self.dataset_col,self.prediction_col,prediction["_id"])
+        else:
+            print "there is no prediction associated to this declined alert"
         # end update training set
 
         serializer = self.get_serializer(instance,data=instance)
@@ -205,7 +209,7 @@ class DenyAlert(generics.RetrieveUpdateAPIView):
 class CurrentClient(APIView):
      def get_client(self, user):
         try:
-            return Client.objects.filter(client_id=user).first()
+            return Client.objects.get(client_id=user)
         except Client.DoesNotExist:
             raise Client.DoesNotExist
 
@@ -225,11 +229,13 @@ class AddAnomaly(generics.ListCreateAPIView):
         serializer.save(client=self.request.user, reporting_date=datetime.datetime.now().replace(microsecond=0) )
         # start update training set
         dt = datetime.datetime.strptime(serializer.data['occurence_date'], '%Y-%m-%dT%H:%M:%SZ')
-        prediction = self.prediction_col.getPrediction(serializer.data['crop_production'],dt)
+        disease = Disease.objects.get(pk=serializer.data['disease'])
+        print "disease : ",disease
+        prediction = self.prediction_col.getPrediction(serializer.data['crop_production'],disease.disease_name,dt)
         if prediction is not None:
             penalizeNeighbors(self.dataset_col,self.prediction_col,prediction["_id"])
         else:
-            print "none"
+            print "there is no prediction associated to this anomaly"
         # end update training set
 
 
@@ -264,7 +270,8 @@ class ChangePasswordView(generics.UpdateAPIView):
 class RiskRates(APIView):
     prediction_col = PredictionCollection()
     def get(self, request, crop, disease, format=None):
-        predictions = self.prediction_col.getRiskRates(int(crop), int(disease))
+        disease = Disease.objects.get(pk=disease)
+        predictions = self.prediction_col.getRiskRates(int(crop), disease.disease_name)
         serializer = RiskRateSerializer(predictions, many= True)
         return Response(serializer.data)
 
@@ -273,20 +280,25 @@ class RiskRateByCrop(APIView):
     def get(self, request, crop, format=None):
         dt = datetime.datetime.now()
         crop_production = CropProduction.objects.get(pk=crop)
+        # recuperer la liste des maladies surveillees pour cette culture
         serializer = DiseaseSerializer(crop_production.diseases, many = True)
-        dn =len(serializer.data)
-        predictions = self.prediction_col.getRiskRateByCrop(int(crop),dn)
+        # disease_number: dn, recuperer le nombre de maladies surveillees
+        predictions =[]
+        for disease in serializer.data:
+            # recuperer les dn predictions les plus recentes de cette culture
+            pred = self.prediction_col.getLastRiskRate(int(crop),disease["disease_name"])
+            if (pred is not None):
+                predictions.append(pred)
+        # retourner la liste des predictions
         serializer = RiskRateSerializer(predictions, many= True)
         return Response(serializer.data)
 
 class CurrentRiskRate(APIView):
     prediction_col = PredictionCollection()
     def get(self, request, crop, disease,format=None):
-        dt = datetime.datetime.now()
         prediction = self.prediction_col.getLastRiskRate(int(crop),int(disease))
         serializer = RiskRateSerializer(prediction)
         return Response(serializer.data)
-
 
 class DiseaseDetail(generics.RetrieveAPIView):
     queryset = Disease.objects.all()
@@ -296,10 +308,8 @@ class CropProductionByClient(generics.ListAPIView):
     def get_crop_productions_by_client_ID(self, user):
         try:
             crops=list(CropClient.objects.filter(client=user))
-
             liste=[]
             for crop in crops:
-
                  liste.append(crop.crop_production.crop_production_id)
             return list(CropProduction.objects.filter(crop_production_id__in =liste))
         except CropClient.DoesNotExist:

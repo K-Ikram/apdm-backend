@@ -43,25 +43,24 @@ class PredictionCollection(MongoConnection):
        self.get_collection('prediction')
 
 
-    def getPrediction(self,cropProductionID, predictionDate):
+    def getPrediction(self,cropProductionID, diseaseName, predictionDate):
         dt = datetime.datetime(predictionDate.year,predictionDate.month,predictionDate.day,predictionDate.hour)
-        prediction = self.collection.find_one({"crop_production":cropProductionID, "prediction_date":dt})
+        prediction = self.collection.find_one({"crop_production":cropProductionID,"disease":diseaseName, "prediction_date":dt})
         return prediction
 
     def getRiskRates(self,cropProductionID, disease):
         predictions = []
-        cursor = self.collection.find({"crop_production":cropProductionID, "disease":disease})
+        cursor = self.collection.find({"crop_production":cropProductionID, "disease":disease}).sort("prediction_date",-1).limit(10)
         for doc in cursor:
             predictions.append(doc)
         return predictions
 
-    def getRiskRateByCrop(self, crop_production, dn):
+    # prediction_date = datetime.datetime(dt.year,dt.month,dt.day)
+
+    def getLastRiskRate(self, crop_production, disease):
         predictions = []
-        # prediction_date = datetime.datetime(dt.year,dt.month,dt.day)
-        cursor = self.collection.find({"crop_production":crop_production}).sort("prediction_date",-1).limit(dn)
-        for doc in cursor:
-            predictions.append(doc)
-        return predictions
+        cursor = self.collection.find({"crop_production":crop_production, "disease":disease}).sort("prediction_date",-1).limit(1)
+        return cursor.next()
 
     def getPredictionByID(self,prediction_id):
         prediction = self.collection.find_one({"_id":ObjectId(prediction_id)})

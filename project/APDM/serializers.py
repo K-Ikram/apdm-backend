@@ -26,6 +26,8 @@ class FarmSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class AlertSerializer(serializers.ModelSerializer):
+    disease = serializers.StringRelatedField()
+    crop_production = serializers.StringRelatedField()
     class Meta:
         model = Alert
         fields = '__all__'
@@ -49,7 +51,7 @@ class AnomalySerializer(serializers.ModelSerializer):
 
 class RiskRateSerializer(serializers.Serializer):
     crop_production = serializers.IntegerField()
-    disease = serializers.IntegerField()
+    disease = serializers.CharField()
     risk_rate= serializers.FloatField()
     prediction_date = serializers.DateTimeField()
 

@@ -13,45 +13,45 @@ from .models import *
 class OwnfarmInline(admin.TabularInline):
     model = Ownfarm
     extra = 1
-    
+
 class CropProductionDiseaseInline(admin.TabularInline):
     model = CropProductionDisease
     extra = 1
-    
+
 class CropProductionSensorInline(admin.TabularInline):
     model = CropProductionSensor
     extra = 1
-    
-    
+
+
 class ClientAdmin(admin.ModelAdmin):
     list_display=['username','first_name','last_name','email','phone_contact','phone_sms','is_active', 'is_staff', 'is_superuser']
     inlines = [OwnfarmInline]
-  
+
 
 class FarmAdmin(admin.ModelAdmin):
     list_display=['farm_name','city' ,'get_clients']
     inlines = [OwnfarmInline]
-    
+
     def get_clients(self, obj):
         return "\n".join([p.username for p in obj.clients.all()])
-    
+
 class SensorPlotInline(admin.TabularInline):
     model = SensorPlot
-    
+
 class PlotAdmin(admin.ModelAdmin):
     inlines = [SensorPlotInline]
 
 class SensorAdmin(admin.ModelAdmin):
     inlines = [SensorPlotInline,CropProductionSensorInline]
-    
+
 class DiseaseAdmin(admin.ModelAdmin):
     inlines=(CropProductionDiseaseInline,)
 
 class CropProductionAdmin(admin.ModelAdmin):
     inlines=(CropProductionDiseaseInline,CropProductionSensorInline,)
-    
-    
-    
+
+
+admin.site.site_header = 'APDM administration'    
 
 admin.site.register(Plot, PlotAdmin)
 admin.site.register(Sensor, SensorAdmin)
