@@ -23,6 +23,10 @@ class Client(AbstractUser):
     phone_sms = models.CharField(max_length=50)
     language = models.CharField(max_length=50, blank=True, null=True)
     comments = models.CharField(max_length=100, blank=True, null=True)
+    class Meta:
+        def __unicode__(self):
+            return self.username
+
 
 class Farm(models.Model):
     farm_id = models.AutoField(primary_key=True)
@@ -125,7 +129,7 @@ class Alert(models.Model):
     risk_rate = models.FloatField()
     disease = models.ForeignKey(Disease, on_delete=models.CASCADE)
     feedback_date = models.DateTimeField(blank=True, null=True)
-    feedback_type=models.CharField(max_length=15, blank=True, null=True)
+    feedback_type=models.CharField(max_length=50, blank=True, null=True)
 
     client = models.ForeignKey(settings.AUTH_USER_MODEL,blank=True, null=True)
 
@@ -158,7 +162,16 @@ class CropClient(models.Model):
     class Meta:
         managed = False
         db_table = 'crop_client'
-        
+
+class AlertClient(models.Model):
+
+    client  = models.ForeignKey('Client', on_delete=models.CASCADE, primary_key = True)
+    alert= models.ForeignKey('Alert', on_delete=models.CASCADE, primary_key = True)
+
+    class Meta:
+        managed = False
+        db_table = 'alert_client'
+
 class DjangoMigrations(models.Model):
     app = models.CharField(max_length=255)
     name = models.CharField(max_length=255)

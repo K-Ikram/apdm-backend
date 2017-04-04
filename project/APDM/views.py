@@ -12,6 +12,7 @@ from oauth2_provider.ext.rest_framework import TokenHasReadWriteScope, TokenHasS
 from oauth2_provider.views.generic import ProtectedResourceView
 from django.http import HttpResponse
 from rest_framework import status
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from mongodb import *
 import math
 class FarmList(generics.ListCreateAPIView):
@@ -26,7 +27,6 @@ class FarmList(generics.ListCreateAPIView):
         farms= self.get_farms(user=request.user) # get the farms owned by this user
         serializer = FarmSerializer(farms, many=True)
         return Response(serializer.data)
-
 
 class PlotList(generics.ListCreateAPIView):
 
@@ -51,17 +51,11 @@ class PlotsByFarm(APIView):
         serializer = PlotSerializer(plots, many= True)
         return Response(serializer.data)
 
-
 class PlotDetail(generics.RetrieveUpdateDestroyAPIView):
-
-
     queryset = Plot.objects.all()
     serializer_class = PlotSerializer
 
-
 class FarmDetail(generics.RetrieveUpdateDestroyAPIView):
-
-
     queryset = Farm.objects.all()
     serializer_class = FarmSerializer
 
@@ -69,7 +63,6 @@ class CropProductionList(generics.ListCreateAPIView):
 
     queryset = CropProduction.objects.all()
     serializer_class = CropProductionSerializer
-
 
 class CropProductionDetail(generics.RetrieveUpdateDestroyAPIView):
 
@@ -115,13 +108,7 @@ class CropProductionsByPlot(APIView):
         serializer = CropProductionSerializer(crop_productions, many= True)
         return Response(serializer.data)
 
-
 class AlertByCropProduction(APIView):
-    def get_alert_by_crop_production(self, idCropProd):
-        try:
-            return list(Alert.objects.filter(crop_production=idCropProd))
-        except Alert.DoesNotExist:
-            raise Http404
 
     def get(self, request,  idCropProd, format=None):
         alerts = self.get_alert_by_crop_production(idCropProd)
@@ -131,7 +118,6 @@ class AlertByCropProduction(APIView):
 class UpdateProfile(generics.RetrieveUpdateAPIView):
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
-
 
 class ConfirmAlert(generics.RetrieveUpdateAPIView):
 
@@ -146,7 +132,7 @@ class ConfirmAlert(generics.RetrieveUpdateAPIView):
     def perform_update(self, serializer):
         serializer.save(client=self.request.user)
 
-    def put(self, request, *args, **kwargs):
+    def patch(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.feedback_type = "confirmed"
         instance.feedback_date = datetime.datetime.now().replace(microsecond=0)
@@ -155,7 +141,7 @@ class ConfirmAlert(generics.RetrieveUpdateAPIView):
 
         # start update training set
         prediction_date = instance.alert_date.replace(minute=0,second=0,microsecond=0)
-        prediction = self.prediction_col.getPrediction(instance.crop_production_id,prediction_date)
+        prediction = self.prediction_col.getPrediction(instance.crop_production_id,instance.disease.disease_name,prediction_date)
         if prediction is not None:
             if (prediction["disease"] == 1):
                 self.dataset_col.addToFHBTrainingSet(prediction)
@@ -172,7 +158,6 @@ class ConfirmAlert(generics.RetrieveUpdateAPIView):
 
         return Response(serializer.data)
 
-
 class DenyAlert(generics.RetrieveUpdateAPIView):
 
     queryset = Alert.objects.all()
@@ -183,7 +168,7 @@ class DenyAlert(generics.RetrieveUpdateAPIView):
     dataset_col = TrainingSetCollection()
     prediction_col = PredictionCollection()
 
-    def put(self, request, *args, **kwargs):
+    def patch(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.feedback_type = "denied"
         instance.feedback_date = datetime.datetime.now().replace(microsecond=0)
@@ -192,7 +177,8 @@ class DenyAlert(generics.RetrieveUpdateAPIView):
 
         # start update training set
         prediction_date = instance.alert_date.replace(minute=0,second=0,microsecond=0)
-        prediction = self.prediction_col.getPrediction(instance.crop_production_id,prediction_date)
+        prediction = self.prediction_col.getPrediction(instance.crop_production_id,instance.disease.disease_name,prediction_date)
+
         if prediction is not None:
             penalizeNeighbors(self.dataset_col,self.prediction_col,prediction["_id"])
         else:
@@ -204,7 +190,6 @@ class DenyAlert(generics.RetrieveUpdateAPIView):
         self.perform_update(serializer)
 
         return Response(serializer.data)
-
 
 class CurrentClient(APIView):
      def get_client(self, user):
@@ -237,7 +222,6 @@ class AddAnomaly(generics.ListCreateAPIView):
         else:
             print "there is no prediction associated to this anomaly"
         # end update training set
-
 
 class ChangePasswordView(generics.UpdateAPIView):
     """
@@ -277,8 +261,8 @@ class RiskRates(APIView):
 
 class RiskRateByCrop(APIView):
     prediction_col = PredictionCollection()
+
     def get(self, request, crop, format=None):
-        dt = datetime.datetime.now()
         crop_production = CropProduction.objects.get(pk=crop)
         # recuperer la liste des maladies surveillees pour cette culture
         serializer = DiseaseSerializer(crop_production.diseases, many = True)
@@ -293,6 +277,58 @@ class RiskRateByCrop(APIView):
         serializer = RiskRateSerializer(predictions, many= True)
         return Response(serializer.data)
 
+class MaxRiskRateByPlot(APIView):
+    prediction_col = PredictionCollection()
+
+    def get(self, request, plot, format=None):
+        prediction = None
+        maxrisk = 0
+        crops = CropProduction.objects.filter(plot=plot)
+        predictions =[]
+        for crop in crops:
+            serializer = DiseaseSerializer(crop.diseases, many = True)
+            for disease in serializer.data:
+                pred = self.prediction_col.getLastRiskRate(crop.crop_production_id,disease["disease_name"])
+
+                if pred is not None:
+                    if(maxrisk<pred['risk_rate']):
+                        maxrisk = pred['risk_rate']
+                        prediction = pred
+                else:
+                    print "there is no prediction"
+
+        if prediction is None:
+            return HttpResponse("No prediction")
+        serializer = RiskRateSerializer(prediction)
+        return Response(serializer.data)
+
+class MaxRiskRatesByPlot(APIView):
+    prediction_col = PredictionCollection()
+
+    def get(self, request, plot, format=None):
+        crops = CropProduction.objects.filter(plot=plot)
+        predictions =[]
+        for crop in crops:
+            prediction = None
+            maxrisk = 0
+            serializer = DiseaseSerializer(crop.diseases, many = True)
+            for disease in serializer.data:
+                pred = self.prediction_col.getLastRiskRate(crop.crop_production_id,disease["disease_name"])
+
+                if pred is not None:
+                    if(maxrisk<pred['risk_rate']):
+                        maxrisk = pred['risk_rate']
+                        prediction = pred
+                else:
+                    print "there is no prediction"
+            if prediction is not None:
+                predictions.append(prediction)
+
+
+        serializer = RiskRateSerializer(predictions,many=True)
+        return Response(serializer.data)
+
+
 class CurrentRiskRate(APIView):
     prediction_col = PredictionCollection()
     def get(self, request, crop, disease,format=None):
@@ -304,7 +340,52 @@ class DiseaseDetail(generics.RetrieveAPIView):
     queryset = Disease.objects.all()
     serializer_class = DiseaseSerializer
 
+
+class AlertByClient(generics.ListAPIView):
+
+    def get(self, request, format=None):
+        try:
+            alerts = AlertClient.objects.filter(client =request.user).order_by('alert')
+        except AlertClient.DoesNotExist:
+            return HttpResponse('not found')
+
+        paginator = Paginator(alerts, 5)
+        page = request.GET.get('page')
+        print("page",paginator.num_pages)
+
+        try:
+            alerts = paginator.page(page)
+
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            alerts = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range (e.g. 9999), deliver empty array.
+            alerts = []
+        print(alerts.has_next())
+        serializer = AlertClientSerializer(alerts, many=True)
+
+        if alerts.has_previous():
+            _previous = alerts.previous_page_number();
+        else:
+            _previous = None
+
+        if alerts.has_next():
+            _next = alerts.next_page_number();
+        else:
+            _next = None
+
+        return Response({
+        "results":serializer.data,
+        "count":paginator.num_pages,
+        "has_next":alerts.has_next(),
+        "has_previous":alerts.has_previous(),
+        "previous":_previous,
+        "next":_next}
+        )
+
 class CropProductionByClient(generics.ListAPIView):
+
     def get_crop_productions_by_client_ID(self, user):
         try:
             crops=list(CropClient.objects.filter(client=user))
@@ -321,16 +402,13 @@ class CropProductionByClient(generics.ListAPIView):
         serializer = CropProductionSerializer(crop_productions, many= True)
         return Response(serializer.data)
 
-
 def rewardNeighbors(dataset_col,prediction_col,prediction_id):
-
     neighbors = prediction_col.getPredictionNeighbours(prediction_id)
     for neighbor in neighbors:
         old_weight = dataset_col.getTrainingSetElementByID(neighbor)["weight"]
         new_weight = 2- math.pow(old_weight-2,2)/2
         print old_weight, new_weight
         dataset_col.updateTrainingSetElementWeight(neighbor, new_weight)
-
 
 def penalizeNeighbors(dataset_col,prediction_col,prediction_id):
     neighbors = prediction_col.getPredictionNeighbours(prediction_id)

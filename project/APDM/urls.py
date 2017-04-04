@@ -21,14 +21,18 @@ urlpatterns = [
     url(r'^disease/(?P<pk>[0-9]+)$', DiseaseDetail.as_view()),
 
     url(r'^alerts/$', AlertList.as_view()),
+    url(r'^alertsbyclient/$', AlertByClient.as_view()),
     url(r'^alertsbycropproduction/(?P<idCropProd>[0-9]+)$', AlertByCropProduction.as_view()),
     url(r'^alerts/(?P<alert_id>[0-9]+)/confirm', ConfirmAlert.as_view()),
     url(r'^alerts/(?P<alert_id>[0-9]+)/deny', DenyAlert.as_view()),
     url(r'^addAnomaly/$', AddAnomaly.as_view()),
 
+    url(r'^disease/(?P<pk>[0-9]+)$', DiseaseDetail.as_view()),
     url(r'^riskrates/(?P<crop>[0-9]+)/(?P<disease>[0-9]+)$', RiskRates.as_view()),
     url(r'^riskratesbycrop/(?P<crop>[0-9]+)$', RiskRateByCrop.as_view()),
     url(r'^currentriskrate/(?P<crop>[0-9]+)/(?P<disease>[0-9]+)$', CurrentRiskRate.as_view()),
+    url(r'^maxriskratebyplot/(?P<plot>[0-9]+)$', MaxRiskRateByPlot.as_view()),
+    url(r'^maxriskratesbyplot/(?P<plot>[0-9]+)$', MaxRiskRatesByPlot.as_view()),
 
     url(r'^currentClient/', CurrentClient.as_view()),
     url(r'^updateProfile/(?P<pk>[0-9]+)$', UpdateProfile.as_view()),

@@ -135,6 +135,7 @@ AUTH_USER_MODEL = 'APDM.Client'
 
 CORS_ORIGIN_ALLOW_ALL = True
 
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'oauth2_provider.ext.rest_framework.OAuth2Authentication',

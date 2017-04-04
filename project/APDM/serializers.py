@@ -27,6 +27,7 @@ class FarmSerializer(serializers.ModelSerializer):
 
 class AlertSerializer(serializers.ModelSerializer):
     disease = serializers.StringRelatedField()
+    client = serializers.StringRelatedField()
     crop_production = serializers.StringRelatedField()
     class Meta:
         model = Alert
@@ -43,6 +44,12 @@ class CropClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = CropClient
         fields =('client_id','crop_production_id')
+
+class AlertClientSerializer(serializers.ModelSerializer):
+    alert = AlertSerializer(read_only=True)
+    class Meta:
+        model = AlertClient
+        fields =('alert',)
 
 class AnomalySerializer(serializers.ModelSerializer):
     class Meta:
