@@ -33,7 +33,6 @@ class AlertSerializer(serializers.ModelSerializer):
         model = Alert
         fields = '__all__'
         partial=True
-#        read_only_fields = ('pk', 'department')
 
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:

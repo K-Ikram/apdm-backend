@@ -24,11 +24,22 @@ class CropProductionSensorInline(admin.TabularInline):
 
 
 class ClientAdmin(admin.ModelAdmin):
+
     list_display=['username','first_name','last_name','email','phone_contact','phone_sms','is_active', 'is_staff', 'is_superuser']
     inlines = [OwnfarmInline]
 
-
 class FarmAdmin(admin.ModelAdmin):
+    # def get_queryset(self, request):
+    #     qs = super(FarmAdmin, self).get_queryset(request)
+    #     if(request.user.is_superuser):
+    #         return qs
+    #     else:
+    #         return qs.filter(clients=request.user.client_id)
+    #
+    # def save_model(self, request, obj, form, change):
+    #     obj.user = request.user
+    #     obj.save()
+
     list_display=['farm_name','city' ,'get_clients']
     inlines = [OwnfarmInline]
 
@@ -51,11 +62,8 @@ class CropProductionAdmin(admin.ModelAdmin):
     inlines=(CropProductionDiseaseInline,CropProductionSensorInline,)
 
 
-admin.site.site_header = 'APDM administration'    
-
 admin.site.register(Plot, PlotAdmin)
 admin.site.register(Sensor, SensorAdmin)
-
 admin.site.register(Client, ClientAdmin)
 admin.site.register(Farm, FarmAdmin)
 admin.site.register(CropProduction, CropProductionAdmin)

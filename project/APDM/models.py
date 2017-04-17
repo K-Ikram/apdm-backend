@@ -22,11 +22,12 @@ class Client(AbstractUser):
     phone_contact = models.CharField(max_length=50)
     phone_sms = models.CharField(max_length=50)
     language = models.CharField(max_length=50, blank=True, null=True)
+    notification_sms = models.IntegerField()
+    notification_email = models.IntegerField()
     comments = models.CharField(max_length=100, blank=True, null=True)
     class Meta:
         def __unicode__(self):
             return self.username
-
 
 class Farm(models.Model):
     farm_id = models.AutoField(primary_key=True)
@@ -44,7 +45,6 @@ class Farm(models.Model):
 class Ownfarm(models.Model):
     client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     farm = models.ForeignKey(Farm, on_delete=models.CASCADE)
-
 
 class Disease(models.Model):
     disease_id = models.AutoField(primary_key=True)
@@ -85,7 +85,6 @@ class Plot(models.Model):
    def __unicode__(self):
        return self.plot_name
 
-
 class SensorPlot(models.Model):
     plot = models.ForeignKey('Plot',on_delete=models.CASCADE)
     sensor = models.ForeignKey('Sensor',on_delete=models.CASCADE)
@@ -111,22 +110,19 @@ class CropProduction(models.Model):
     def __unicode__(self):
         return self.name
 
-
 class CropProductionDisease(models.Model):
     crop_production = models.ForeignKey(CropProduction, on_delete=models.CASCADE)
     disease = models.ForeignKey(Disease, on_delete=models.CASCADE)
-
 
 class CropProductionSensor(models.Model):
     crop_production = models.ForeignKey(CropProduction, on_delete=models.CASCADE)
     sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE )
 
-
 class Alert(models.Model):
     alert_id = models.AutoField(primary_key=True)
-    alert_date = models.DateTimeField()
+    alert_date = models.DateTimeField(blank=True, null=True)
     crop_production = models.ForeignKey(CropProduction, on_delete=models.CASCADE)
-    risk_rate = models.FloatField()
+    risk_rate = models.FloatField(blank=True, null=True)
     disease = models.ForeignKey(Disease, on_delete=models.CASCADE)
     feedback_date = models.DateTimeField(blank=True, null=True)
     feedback_type=models.CharField(max_length=50, blank=True, null=True)
@@ -136,9 +132,6 @@ class Alert(models.Model):
     class Meta:
         managed = False
         db_table = 'alert'
-#    def __unicode__(self):
-#        return self.alert_date
-
 
 class Anomaly(models.Model):
     anomaly_id = models.AutoField(primary_key=True)
@@ -151,13 +144,11 @@ class Anomaly(models.Model):
     class Meta:
         managed = False
         db_table = 'anomaly'
-#    def __unicode__(self):
-#        return self.occurence_date
 
 class CropClient(models.Model):
 
-    client  = models.ForeignKey('Client', on_delete=models.CASCADE, primary_key = True)
-    crop_production= models.ForeignKey('CropProduction', on_delete=models.CASCADE, primary_key = True)
+    client  = models.ForeignKey('Client', primary_key = True)
+    crop_production= models.ForeignKey('CropProduction', primary_key = True)
 
     class Meta:
         managed = False
@@ -165,8 +156,8 @@ class CropClient(models.Model):
 
 class AlertClient(models.Model):
 
-    client  = models.ForeignKey('Client', on_delete=models.CASCADE, primary_key = True)
-    alert= models.ForeignKey('Alert', on_delete=models.CASCADE, primary_key = True)
+    client  = models.ForeignKey('Client', primary_key = True)
+    alert= models.ForeignKey('Alert', primary_key = True)
 
     class Meta:
         managed = False
