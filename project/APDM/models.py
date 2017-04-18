@@ -16,14 +16,25 @@ class City(models.Model):
     def __unicode__(self):
         return self.city_name
 
+GENDERCHOICE = (
+    ('homme', 'Homme'),
+    ('femme', 'Femme'),
+)
+LANGUAGECHOICE = (
+    ('french', 'french'),
+    ('english', 'english'),
+    ('arabic','arabic'),
+    ('spanish','spanish'),
+    ('german','german'),
+)
 class Client(AbstractUser):
     client_id = models.AutoField(primary_key=True)
-    gender = models.CharField(max_length=5, blank=True, null=True)
-    phone_contact = models.CharField(max_length=50)
-    phone_sms = models.CharField(max_length=50)
-    language = models.CharField(max_length=50, blank=True, null=True)
-    notification_sms = models.IntegerField()
-    notification_email = models.IntegerField()
+    gender = models.CharField(max_length=5, choices=GENDERCHOICE,blank=True, null=True)
+    phone_contact = models.CharField(max_length=50,blank=True, null=True,verbose_name='Phone contact')
+    phone_sms = models.CharField(max_length=50,blank=True, null=True)
+    language = models.CharField(max_length=10, choices=LANGUAGECHOICE,blank=True, null=True)
+    notification_sms = models.BooleanField(default=True,help_text="Activicate reception of notifications by SMS")
+    notification_email = models.BooleanField(default=True,help_text="Activicate reception of notifications by email")
     comments = models.CharField(max_length=100, blank=True, null=True)
     class Meta:
         def __unicode__(self):
@@ -45,16 +56,6 @@ class Farm(models.Model):
 class Ownfarm(models.Model):
     client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     farm = models.ForeignKey(Farm, on_delete=models.CASCADE)
-
-class Disease(models.Model):
-    disease_id = models.AutoField(primary_key=True)
-    disease_name = models.CharField(max_length=50)
-
-    class Meta:
-        managed = False
-        db_table = 'disease'
-    def __unicode__(self):
-        return self.disease_name
 
 class Sensor(models.Model):
     sensor_id = models.AutoField(primary_key=True)
@@ -91,9 +92,30 @@ class SensorPlot(models.Model):
     start_date = models.DateField()
     end_date = models.DateField(blank=True, null=True)
 
+class Crop(models.Model):
+    crop_id = models.AutoField(primary_key=True)
+    crop_name = models.CharField(max_length=50)
+    class Meta:
+        managed = False
+        db_table = 'crop'
+
+    def __unicode__(self):
+        return self.crop_name
+
+class Disease(models.Model):
+    disease_id = models.AutoField(primary_key=True)
+    disease_name = models.CharField(max_length=50)
+    crop=models.ForeignKey('Crop',on_delete=models.CASCADE)
+
+    class Meta:
+        managed = False
+        db_table = 'disease'
+    def __unicode__(self):
+        return self.disease_name
+
 class CropProduction(models.Model):
     crop_production_id = models.AutoField(primary_key=True)
-    crop = models.CharField(max_length=6, blank=True, null=True)
+    crop = models.ForeignKey('Crop')
     name = models.CharField(max_length=50)
     start_date = models.DateField()
     end_date = models.DateField(blank=True, null=True)
@@ -147,8 +169,8 @@ class Anomaly(models.Model):
 
 class CropClient(models.Model):
 
-    client  = models.ForeignKey('Client', primary_key = True)
-    crop_production= models.ForeignKey('CropProduction', primary_key = True)
+    client_id  = models.IntegerField(primary_key = True)
+    crop_production_id= models.IntegerField(primary_key = True)
 
     class Meta:
         managed = False

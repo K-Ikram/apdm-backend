@@ -7,17 +7,18 @@ from APDM.serializers import *
 from rest_framework import permissions
 from rest_framework import generics, mixins
 import datetime
-from oauth2_provider.models import AccessToken, Application
-from oauth2_provider.ext.rest_framework import TokenHasReadWriteScope, TokenHasScope
-from oauth2_provider.views.generic import ProtectedResourceView
+from oauth2_provider.ext.rest_framework import OAuth2Authentication
+from rest_framework.permissions import IsAuthenticated
 from django.http import HttpResponse
 from rest_framework import status
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from APDM.mongodb import *
-import math
 import xmlrpclib
 
 class FarmList(generics.ListCreateAPIView):
+    authentication_classes = [OAuth2Authentication]
+    permission_classes = [IsAuthenticated]
+
     def get_farms(self, user):
         try:
             return Farm.objects.filter(clients=user)
@@ -30,5 +31,8 @@ class FarmList(generics.ListCreateAPIView):
         return Response(serializer.data)
 
 class FarmDetail(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = [OAuth2Authentication]
+    permission_classes = [IsAuthenticated]
+
     queryset = Farm.objects.all()
     serializer_class = FarmSerializer

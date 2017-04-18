@@ -6,17 +6,15 @@ from APDM.models import *
 from APDM.serializers import *
 from rest_framework import permissions
 from rest_framework import generics, mixins
-import datetime
-from oauth2_provider.models import AccessToken, Application
-from oauth2_provider.ext.rest_framework import TokenHasReadWriteScope, TokenHasScope
-from oauth2_provider.views.generic import ProtectedResourceView
 from django.http import HttpResponse
 from rest_framework import status
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from APDM.mongodb import *
-import math
-
+from oauth2_provider.ext.rest_framework import OAuth2Authentication
+from rest_framework.permissions import IsAuthenticated
 class CurrentClient(APIView):
+     authentication_classes = [OAuth2Authentication]
+     permission_classes = [IsAuthenticated]
      def get_client(self, user):
         try:
             return Client.objects.get(client_id=user)
@@ -28,7 +26,24 @@ class CurrentClient(APIView):
         serializer = ClientSerializer(client)
         return Response(serializer.data)
 
+class ClientByUsername(APIView):
+     def get_client(self, username):
+        try:
+            return Client.objects.get(username=username)
+        except Client.DoesNotExist:
+            raise Client.DoesNotExist
+
+     def get(self, request,username, format=None):
+        try:
+            client= self.get_client(username=username)
+            serializer = ClientSerializer(client)
+            return Response(serializer.data)
+        except Client.DoesNotExist:
+            return HttpResponse("Client doesn't exist")
+
 class UpdateProfile(generics.RetrieveUpdateAPIView):
+    authentication_classes = [OAuth2Authentication]
+    permission_classes = [IsAuthenticated]
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
 
@@ -36,9 +51,10 @@ class ChangePasswordView(generics.UpdateAPIView):
     """
     An endpoint for changing password.
     """
+    authentication_classes = [OAuth2Authentication]
+    permission_classes = [IsAuthenticated]
     serializer_class = ChangePasswordSerializer
     model = Client
-    #permission_classes = (IsAuthenticated,)
 
     def get_object(self, queryset=None):
         obj = self.request.user

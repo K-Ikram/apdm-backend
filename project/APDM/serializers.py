@@ -4,6 +4,7 @@ from rest_framework import serializers
 from models import *
 
 class DiseaseSerializer(serializers.ModelSerializer):
+    crop = serializers.StringRelatedField()
     class Meta:
         model = Disease
         fields = '__all__'
@@ -14,6 +15,7 @@ class PlotSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class CropProductionSerializer(serializers.ModelSerializer):
+    crop = serializers.StringRelatedField()
     class Meta:
         model = CropProduction
         fields = '__all__'
@@ -37,7 +39,7 @@ class AlertSerializer(serializers.ModelSerializer):
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
-        fields = ('client_id','gender','phone_contact', 'phone_sms', 'email', 'first_name', 'last_name','username','language','date_joined','is_staff','is_active','is_superuser','last_login')
+        fields = ('client_id','gender','phone_contact', 'phone_sms', 'email', 'first_name', 'last_name','username','language','date_joined','is_staff','is_active','is_superuser','last_login','notification_email','notification_sms')
 
 class CropClientSerializer(serializers.ModelSerializer):
     class Meta:

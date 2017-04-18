@@ -7,9 +7,6 @@ from APDM.serializers import *
 from rest_framework import permissions
 from rest_framework import generics, mixins
 import datetime
-from oauth2_provider.models import AccessToken, Application
-from oauth2_provider.ext.rest_framework import TokenHasReadWriteScope, TokenHasScope
-from oauth2_provider.views.generic import ProtectedResourceView
 from django.http import HttpResponse
 from rest_framework import status
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -17,8 +14,12 @@ from APDM.mongodb import *
 import math
 import jsonrpclib
 from django.conf import settings
+from oauth2_provider.ext.rest_framework import OAuth2Authentication
+from rest_framework.permissions import IsAuthenticated
 
 class AlertByClient(generics.ListAPIView):
+    authentication_classes = [OAuth2Authentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, format=None):
         try:
@@ -61,24 +62,21 @@ class AlertByClient(generics.ListAPIView):
         "next":_next}
         )
 
-class AlertByCropProduction(APIView):
-
-    def get(self, request,  idCropProd, format=None):
-        alerts = self.get_alert_by_crop_production(idCropProd)
-        serializer = AlertSerializer(alerts, many= True)
-        return Response(serializer.data)
-
 class AlertList(generics.ListCreateAPIView):
+    authentication_classes = [OAuth2Authentication]
+    permission_classes = [IsAuthenticated]
 
     queryset = Alert.objects.all()
     serializer_class = AlertSerializer
 
 class ConfirmAlert(generics.RetrieveUpdateAPIView):
+    authentication_classes = [OAuth2Authentication]
+    permission_classes = [IsAuthenticated]
 
     queryset = Alert.objects.all()
     serializer_class = AlertSerializer
-    lookup_field = 'alert_id'
-    lookup_url_kwarg = 'alert_id'
+    lookup_field = 'pk'
+    lookup_url_kwarg = 'pk'
 
     def perform_update(self, serializer):
         serializer.save(client=self.request.user)
@@ -104,11 +102,13 @@ class ConfirmAlert(generics.RetrieveUpdateAPIView):
         return Response(serializer.data)
 
 class DenyAlert(generics.RetrieveUpdateAPIView):
+    authentication_classes = [OAuth2Authentication]
+    permission_classes = [IsAuthenticated]
 
     queryset = Alert.objects.all()
     serializer_class = AlertSerializer
-    lookup_field = 'alert_id'
-    lookup_url_kwarg = 'alert_id'
+    lookup_field = 'pk'
+    lookup_url_kwarg = 'pk'
 
     def patch(self, request, *args, **kwargs):
         instance = self.get_object()
