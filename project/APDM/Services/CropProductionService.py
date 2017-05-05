@@ -12,8 +12,6 @@ from rest_framework.permissions import IsAuthenticated
 from django.http import HttpResponse
 from rest_framework import status
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from APDM.mongodb import *
-import math
 
 class CropProductionList(generics.ListCreateAPIView):
     authentication_classes = [OAuth2Authentication]

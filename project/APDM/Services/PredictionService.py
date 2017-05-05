@@ -9,7 +9,6 @@ from rest_framework import generics, mixins
 import datetime
 from oauth2_provider.ext.rest_framework import OAuth2Authentication
 from rest_framework.permissions import IsAuthenticated
-
 from django.http import HttpResponse
 from rest_framework import status
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -42,6 +41,7 @@ class RiskRateByCrop(APIView):
             pred = learningDataAccess.getLastRiskRate(int(crop),disease["disease_name"])
             if (pred is not None):
                 predictions.append(pred)
+                print pred
         # retourner la liste des predictions
         serializer = RiskRateSerializer(predictions, many= True)
         return Response(serializer.data)

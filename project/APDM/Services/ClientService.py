@@ -9,9 +9,9 @@ from rest_framework import generics, mixins
 from django.http import HttpResponse
 from rest_framework import status
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from APDM.mongodb import *
 from oauth2_provider.ext.rest_framework import OAuth2Authentication
 from rest_framework.permissions import IsAuthenticated
+
 class CurrentClient(APIView):
      authentication_classes = [OAuth2Authentication]
      permission_classes = [IsAuthenticated]

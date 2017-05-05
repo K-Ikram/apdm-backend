@@ -10,8 +10,6 @@ import datetime
 from django.http import HttpResponse
 from rest_framework import status
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from APDM.mongodb import *
-import math
 import jsonrpclib
 from django.conf import settings
 from oauth2_provider.ext.rest_framework import OAuth2Authentication
@@ -23,7 +21,10 @@ class AlertByClient(generics.ListAPIView):
 
     def get(self, request, format=None):
         try:
-            alerts = AlertClient.objects.filter(client =request.user).order_by('alert')
+            ids= AlertClient.objects.filter(client_id =request.user.client_id).values_list('alert_id', flat=True)
+
+            alerts = Alert.objects.filter(alert_id__in=ids).order_by('alert_date')
+            print alerts
         except AlertClient.DoesNotExist:
             return HttpResponse('not found')
 
@@ -41,7 +42,7 @@ class AlertByClient(generics.ListAPIView):
             # If page is out of range (e.g. 9999), deliver empty array.
             alerts = []
         print(alerts.has_next())
-        serializer = AlertClientSerializer(alerts, many=True)
+        serializer = AlertSerializer(alerts, many=True)
 
         if alerts.has_previous():
             _previous = alerts.previous_page_number();
@@ -92,7 +93,6 @@ class ConfirmAlert(generics.RetrieveUpdateAPIView):
         dt  =datetime.datetime.strftime(instance.alert_date,'%Y-%m-%dT%H:%M:%SZ')
         server = jsonrpclib.Server(settings.JSON_RPC_SERVER)
         server.reward(dt,instance.disease.disease_name,instance.crop_production.crop_production_id)
-
         # end update training set
 
         serializer = self.get_serializer(instance,data=instance)

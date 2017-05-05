@@ -9,8 +9,6 @@ import datetime
 from django.http import HttpResponse
 from rest_framework import status
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from APDM.mongodb import *
-import math
 import jsonrpclib
 from django.conf import settings
 from oauth2_provider.ext.rest_framework import OAuth2Authentication
@@ -22,11 +20,10 @@ class AddAnomaly(generics.ListCreateAPIView):
     serializer_class = AnomalySerializer
 
     def perform_create(self, serializer):
-
         serializer.save(client=self.request.user, reporting_date=datetime.datetime.now().replace(microsecond=0) )
         # start update training set
         disease = Disease.objects.get(pk=serializer.data['disease'])
         server = jsonrpclib.Server(settings.JSON_RPC_SERVER)
-        server.function(serializer.data['occurence_date'],disease.disease_name,serializer.data["crop_production"])
+        server.penalize(serializer.data['occurence_date'],disease.disease_name,serializer.data['crop_production'])
 
         # end update training set

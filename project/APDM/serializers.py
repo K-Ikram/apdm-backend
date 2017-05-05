@@ -47,10 +47,10 @@ class CropClientSerializer(serializers.ModelSerializer):
         fields =('client_id','crop_production_id')
 
 class AlertClientSerializer(serializers.ModelSerializer):
-    alert = AlertSerializer(read_only=True)
+    alert_id = AlertSerializer(read_only=True)
     class Meta:
         model = AlertClient
-        fields =('alert',)
+        fields =('alert_id',)
 
 class AnomalySerializer(serializers.ModelSerializer):
     class Meta:

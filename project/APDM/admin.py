@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.contrib import admin
 from .models import *
 # Register your models here.
@@ -44,7 +45,13 @@ class SensorAdmin(admin.ModelAdmin):
     inlines = [SensorPlotInline,CropProductionSensorInline]
 
 class DiseaseAdmin(admin.ModelAdmin):
-    list_display=['disease_name','crop']
+    list_display=['disease_name','crop','job_period']
+    def save_model(self, request, obj, form, change):
+        if(not obj.job_period):
+            obj.set_job_period(12)
+        print "changed job period to",obj.job_period
+        obj.save()
+
 
 class CropProductionAdmin(admin.ModelAdmin):
     list_display=['name','crop','start_date','end_date','yield_field','plot']
@@ -86,14 +93,14 @@ class AnomalyAdmin(admin.ModelAdmin):
 class ClientAdmin(admin.ModelAdmin):
     list_display=['username','first_name','last_name','email','gender','date_joined','is_active','is_superuser']
     search_fields = ('username','first_name','last_name','email')
-    list_filter = ('gender','language')
+    list_filter = ('gender','language','is_superuser','is_active','groups')
     list_per_page = SIZE_LISTE_PER_PAGE
     list_max_show_all = SIZE_LISTE_SHOW_ALL
     fieldsets = (
         (None, {
             'fields': ('username','email','is_staff', 'is_superuser')
         }),
-        ('Advanced options', {
+        ('Informations supplémentaires', {
             'classes': ('collapse',),
             'fields': ('first_name','last_name','gender','language',
             'phone_contact','phone_sms','notification_sms','notification_email','groups'),
@@ -101,9 +108,10 @@ class ClientAdmin(admin.ModelAdmin):
     )
 
     def save_model(self, request, obj, form, change):
-        password = "aitech"+obj.username
-        print "password:",password
-        obj.set_password(password)
+        if(not obj.password):
+            password = "aitech"+obj.username
+            print "password:",password
+            obj.set_password(password)
         obj.last_modified_by = request.user
         obj.save()
 
@@ -129,10 +137,11 @@ admin.site.register(Plot, PlotAdmin)
 admin.site.register(Sensor, SensorAdmin)
 admin.site.register(Client, ClientAdmin)
 admin.site.register(Farm, FarmAdmin)
+admin.site.register(Disease,DiseaseAdmin)
 admin.site.register(CropProduction, CropProductionAdmin)
 admin.site.register(Alert,AlertAdmin)
 admin.site.register(Anomaly,AnomalyAdmin)
 
-admin.site.site_header = 'Administration panel'
-admin.site.index_title = 'Features area'
+admin.site.site_header = 'Panneau d\'administration'
+#admin.site.index_title = ''
 admin.site.site_title = 'Administration panel'
