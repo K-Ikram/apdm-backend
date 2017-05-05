@@ -44,15 +44,6 @@ class SensorAdmin(admin.ModelAdmin):
 
     inlines = [SensorPlotInline,CropProductionSensorInline]
 
-class DiseaseAdmin(admin.ModelAdmin):
-    list_display=['disease_name','crop','job_period']
-    def save_model(self, request, obj, form, change):
-        if(not obj.job_period):
-            obj.set_job_period(12)
-        print "changed job period to",obj.job_period
-        obj.save()
-
-
 class CropProductionAdmin(admin.ModelAdmin):
     list_display=['name','crop','start_date','end_date','yield_field','plot']
     search_fields = ('name',)
@@ -137,7 +128,6 @@ admin.site.register(Plot, PlotAdmin)
 admin.site.register(Sensor, SensorAdmin)
 admin.site.register(Client, ClientAdmin)
 admin.site.register(Farm, FarmAdmin)
-admin.site.register(Disease,DiseaseAdmin)
 admin.site.register(CropProduction, CropProductionAdmin)
 admin.site.register(Alert,AlertAdmin)
 admin.site.register(Anomaly,AnomalyAdmin)
