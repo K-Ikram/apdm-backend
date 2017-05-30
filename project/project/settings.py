@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'oauth2_provider',
     'corsheaders',
-    'djcelery',
 ]
 
 MIDDLEWARE = [
@@ -126,11 +125,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-from django.utils.translation import ugettext_lazy as _
-LANGUAGES = (
-    ('fr', _('french')),
-    ('en', _('english')),
-)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
@@ -157,16 +151,6 @@ OAUTH2_PROVIDER = {
 
 JSON_RPC_SERVER = 'http://localhost:8800'
 
-# CELERY STUFF
-import djcelery
-djcelery.setup_loader()
-BROKER_URL = 'redis://localhost:6379'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379'
-CELERY_ACCEPT_CONTENT = ['application/json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'
-CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 # CONFIGURE SMTP Server
 EMAIL_HOST = "smtp.gmail.com"
