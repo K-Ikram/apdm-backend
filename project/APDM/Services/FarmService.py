@@ -4,6 +4,7 @@ from rest_framework.decorators import APIView
 from rest_framework.response import Response
 from APDM.models import *
 from APDM.serializers import *
+from APDM.Repository.GenericRepository import GenericRepository
 from rest_framework import permissions
 from rest_framework import generics, mixins
 import datetime
@@ -16,15 +17,10 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 class FarmList(generics.ListCreateAPIView):
     authentication_classes = [OAuth2Authentication]
     permission_classes = [IsAuthenticated]
-
-    def get_farms(self, user):
-        try:
-            return Farm.objects.filter(clients=user)
-        except Farm.DoesNotExist:
-            raise Farm.DoesNotExist
+    farmRepo=GenericRepository(Farm)
 
     def get(self, request, format=None):
-        farms= self.get_farms(user=request.user) # get the farms owned by this user
+        farms= self.farmRepo.filterBy("clients",request.user,None) # get the farms owned by this user
         serializer = FarmSerializer(farms, many=True)
         return Response(serializer.data)
 
@@ -32,5 +28,5 @@ class FarmDetail(generics.RetrieveUpdateDestroyAPIView):
     authentication_classes = [OAuth2Authentication]
     permission_classes = [IsAuthenticated]
 
-    queryset = Farm.objects.all()
+    queryset = GenericRepository(Farm).getAll()
     serializer_class = FarmSerializer

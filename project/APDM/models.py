@@ -4,6 +4,9 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
+from django.db.models import signals
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
 # Create your models here.
 
 
@@ -23,6 +26,7 @@ GENDERCHOICE = (
     ('homme', 'Homme'),
     ('femme', 'Femme'),
 )
+
 LANGUAGECHOICE = (
     ('french', 'Français'),
     ('english', 'Anglais'),
@@ -52,7 +56,7 @@ class Farm(models.Model):
     farm_name = models.CharField(max_length=50,verbose_name="Nom de la ferme")
     city = models.ForeignKey('City', verbose_name="Ville")
     comments = models.CharField(max_length=100, blank=True, null=True, verbose_name="Commentaires")
-    clients=models.ManyToManyField(Client, through='Ownfarm', verbose_name="Propriétaires")
+    clients=models.ManyToManyField('Client', through='Ownfarm', verbose_name="Propriétaires")
 
     class Meta:
         verbose_name = 'Ferme'
@@ -76,7 +80,8 @@ SENSORTYPECHOICE = (
 )
 class Sensor(models.Model):
     sensor_id = models.AutoField(primary_key=True, verbose_name="ID du capteur")
-    sensor_type = models.CharField(max_length=20, verbose_name="Type du capteur", choices=SENSORTYPECHOICE)
+    sensor_type = models.CharField(max_length=20, verbose_name="Type du capteur",
+    choices=SENSORTYPECHOICE)
     sensor_unit = models.CharField(max_length=20,verbose_name="Unité de mesure")
 
     class Meta:
@@ -175,13 +180,19 @@ class CropProductionSensor(models.Model):
         verbose_name = 'Culture'
         verbose_name_plural = 'Cultures'
 
+FEEDBACKTYPECHOICE = (
+    ('confirmed', 'Confirmée'),
+    ('declined', 'Déclinée'),
+    ('',''),
+)
+
 class Alert(models.Model):
     alert_id = models.AutoField(primary_key=True)
     crop_production = models.ForeignKey(CropProduction, on_delete=models.CASCADE, verbose_name="Culture concernée")
     disease = models.ForeignKey(Disease, on_delete=models.CASCADE, verbose_name="Maladie")
     risk_rate = models.FloatField(blank=True, null=True, verbose_name="Taux de risque")
     alert_date = models.DateTimeField(blank=True, null=True, verbose_name="Date de l'alerte")
-    feedback_type=models.CharField(max_length=50, blank=True, null=True, verbose_name="Type de feebdback")
+    feedback_type=models.CharField(max_length=50, blank=True, null=True, verbose_name="Type de feebdback",choices=FEEDBACKTYPECHOICE)
     client = models.ForeignKey(settings.AUTH_USER_MODEL,blank=True, null=True,verbose_name="Source du feedback")
     feedback_date = models.DateTimeField(blank=True, null=True, verbose_name="Date du feedback")
 
@@ -223,11 +234,14 @@ class AlertClient(models.Model):
         managed = False
         db_table = 'alert_client'
 
-class DjangoMigrations(models.Model):
-    app = models.CharField(max_length=255)
-    name = models.CharField(max_length=255)
-    applied = models.DateTimeField()
+def welcome_new_user(sender, instance, created, **kwargs):
+    '''Welcome the new client by sending him an email.'''
+    if created:
+        print "created a new user"
+        subject = 'Bienvenue à la plateforme APDM'
+        message = 'Bonjour cher client '+instance.username+' \nVous pouvez désormais vous connecter à la plateforme APDM en utilisant les informations de connexion suivantes : \nNom d\'utilisateur : '+ instance.username+'\nMot de passe : aitech'+instance.username+'\n\n Accéder à la plateforme à partir du lien suivant : http://localhost:4200/login'
+        from_addr = 'no-reply@example.com'
+        recipient_list = (instance.email,)
+        send_mail(subject, message, from_addr, recipient_list,fail_silently=False)
 
-    class Meta:
-        managed = False
-        db_table = 'django_migrations'
+signals.post_save.connect(welcome_new_user, sender=Client)

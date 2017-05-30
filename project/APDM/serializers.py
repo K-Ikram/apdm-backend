@@ -5,6 +5,13 @@ from models import *
 
 class DiseaseSerializer(serializers.ModelSerializer):
     crop = serializers.StringRelatedField()
+    @staticmethod
+    def setup_eager_loading(queryset):
+        """ Perform necessary eager loading of data. """
+        # select_related for "to-one" relationships
+        queryset = queryset.select_related('crop')
+
+        return queryset
     class Meta:
         model = Disease
         fields = '__all__'
@@ -16,12 +23,16 @@ class PlotSerializer(serializers.ModelSerializer):
 
 class CropProductionSerializer(serializers.ModelSerializer):
     crop = serializers.StringRelatedField()
+    @staticmethod
+    def setup_eager_loading(queryset):
+        """ Perform necessary eager loading of data. """
+        return queryset
+
     class Meta:
         model = CropProduction
         fields = '__all__'
 
 class FarmSerializer(serializers.ModelSerializer):
-    #clients = ClientSerializer(many=True)
     class Meta:
         model = Farm
 
@@ -31,6 +42,15 @@ class AlertSerializer(serializers.ModelSerializer):
     disease = serializers.StringRelatedField()
     client = serializers.StringRelatedField()
     crop_production = serializers.StringRelatedField()
+    @staticmethod
+    def setup_eager_loading(queryset):
+        """ Perform necessary eager loading of data. """
+        # select_related for "to-one" relationships
+        queryset = queryset.select_related('disease')
+        queryset = queryset.select_related('client')
+        queryset = queryset.select_related('crop_production')
+        return queryset
+
     class Meta:
         model = Alert
         fields = '__all__'
@@ -48,6 +68,13 @@ class CropClientSerializer(serializers.ModelSerializer):
 
 class AlertClientSerializer(serializers.ModelSerializer):
     alert_id = AlertSerializer(read_only=True)
+    @staticmethod
+    def setup_eager_loading(queryset):
+        """ Perform necessary eager loading of data. """
+        # select_related for "to-one" relationships
+        queryset = queryset.select_related('alert_id')
+        return queryset
+
     class Meta:
         model = AlertClient
         fields =('alert_id',)

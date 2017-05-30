@@ -4,6 +4,7 @@ from rest_framework.decorators import APIView
 from rest_framework.response import Response
 from APDM.models import *
 from APDM.serializers import *
+from APDM.Repository.GenericRepository import GenericRepository
 from rest_framework import permissions
 from rest_framework import generics, mixins
 import datetime
@@ -13,74 +14,55 @@ from django.http import HttpResponse
 from rest_framework import status
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-class CropProductionList(generics.ListCreateAPIView):
-    authentication_classes = [OAuth2Authentication]
-    permission_classes = [IsAuthenticated]
-
-    queryset = CropProduction.objects.all()
-    serializer_class = CropProductionSerializer
-
 class CropProductionDetail(generics.RetrieveUpdateDestroyAPIView):
     authentication_classes = [OAuth2Authentication]
     permission_classes = [IsAuthenticated]
 
-    queryset = CropProduction.objects.all()
+    queryset = GenericRepository(CropProduction).getAll()
     serializer_class = CropProductionSerializer
 
 class CropProductionsByPlot(APIView):
     authentication_classes = [OAuth2Authentication]
     permission_classes = [IsAuthenticated]
-
-    def get_crop_productions_by_plot_ID(self, plot):
-        try:
-            return list(CropProduction.objects.filter(plot=plot))
-        except CropProduction.DoesNotExist:
-            raise Http404
+    cropRepo = GenericRepository(CropProduction)
 
     def get(self, request, plot, format=None):
-        crop_productions = self.get_crop_productions_by_plot_ID(plot)
+        crop_productions = self.cropRepo.filterBy("plot",plot,None)
         serializer = CropProductionSerializer(crop_productions, many= True)
         return Response(serializer.data)
 
 class CropProductionByClient(generics.ListAPIView):
     authentication_classes = [OAuth2Authentication]
     permission_classes = [IsAuthenticated]
+    cropClientRepo= GenericRepository(CropClient)
+    cropRepo = GenericRepository(CropProduction)
 
     def get_crop_productions_by_client_ID(self, user):
-        try:
-            crops=list(CropClient.objects.filter(client_id=user.client_id))
-            liste=[]
-            for crop in crops:
-                 liste.append(crop.crop_production_id)
-            return list(CropProduction.objects.filter(crop_production_id__in =liste))
-        except CropClient.DoesNotExist:
-            raise Http404
+        ids=self.cropClientRepo.filterBy("client_id",user.client_id,"crop_production_id")
+        return self.cropRepo.filterBy("crop_production_id__in",ids,None)
 
     def get(self, request, format=None):
         crop_productions = self.get_crop_productions_by_client_ID(user=request.user)
-        print("==> crops",crop_productions)
         serializer = CropProductionSerializer(crop_productions, many= True)
         return Response(serializer.data)
 
 class DiseasesByCropProduction(APIView):
     authentication_classes = [OAuth2Authentication]
     permission_classes = [IsAuthenticated]
-
-    def get_object(self, pk):
-        try:
-            return CropProduction.objects.get(pk=pk)
-        except CropProduction.DoesNotExist:
-            raise Http404
+    cropRepo = GenericRepository(CropProduction)
 
     def get(self, request, pk, format=None):
-        crop_production = self.get_object(pk)
-
-        serializer = DiseaseSerializer(crop_production.diseases, many= True)
-        return Response(serializer.data)
+        crop_production = self.cropRepo.getBy("pk",pk)
+        if(crop_production):
+            serializer = DiseaseSerializer(crop_production.diseases, many= True)
+            return Response(serializer.data)
+        else:
+            return HttpResponse("Crop not found")
 
 class DiseaseDetail(generics.RetrieveAPIView):
     authentication_classes = [OAuth2Authentication]
     permission_classes = [IsAuthenticated]
+    diseaseRepo = GenericRepository(Disease)
+    queryset = diseaseRepo.getAll()
 
-    queryset = Disease.objects.all()
     serializer_class = DiseaseSerializer

@@ -4,6 +4,7 @@ from rest_framework.decorators import APIView
 from rest_framework.response import Response
 from APDM.models import *
 from APDM.serializers import *
+from APDM.Repository.GenericRepository import GenericRepository
 from rest_framework import permissions
 from rest_framework import generics, mixins
 from django.http import HttpResponse
@@ -15,36 +16,28 @@ from rest_framework.permissions import IsAuthenticated
 class CurrentClient(APIView):
      authentication_classes = [OAuth2Authentication]
      permission_classes = [IsAuthenticated]
-     def get_client(self, user):
-        try:
-            return Client.objects.get(client_id=user)
-        except Client.DoesNotExist:
-            raise Client.DoesNotExist
+     clientRepo = GenericRepository(Client)
 
      def get(self, request, format=None):
-        client= self.get_client(user=request.user.client_id)
+        client= self.clientRepo.getBy("pk",request.user.client_id)
         serializer = ClientSerializer(client)
         return Response(serializer.data)
 
 class ClientByUsername(APIView):
-     def get_client(self, username):
-        try:
-            return Client.objects.get(username=username)
-        except Client.DoesNotExist:
-            raise Client.DoesNotExist
-
+     clientRepo = GenericRepository(Client)
      def get(self, request,username, format=None):
-        try:
-            client= self.get_client(username=username)
-            serializer = ClientSerializer(client)
-            return Response(serializer.data)
-        except Client.DoesNotExist:
-            return HttpResponse("Client doesn't exist")
+         client= self.clientRepo.getBy("username",username)
+         if(client is not None):
+             serializer = ClientSerializer(client)
+             return Response(serializer.data)
+         else:
+             return HttpResponse("Client doesn't exist")
 
 class UpdateProfile(generics.RetrieveUpdateAPIView):
     authentication_classes = [OAuth2Authentication]
     permission_classes = [IsAuthenticated]
-    queryset = Client.objects.all()
+    clientRepo = GenericRepository(Client)
+    queryset = clientRepo.getAll()
     serializer_class = ClientSerializer
 
 class ChangePasswordView(generics.UpdateAPIView):

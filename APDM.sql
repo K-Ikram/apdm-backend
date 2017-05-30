@@ -1,4 +1,4 @@
-set names 'utf8';
+﻿set names 'utf8';
 drop  database if exists  apdm;
 create database apdm
 character set utf8
@@ -257,7 +257,7 @@ Insert into city (city_id, city_name) values (5,'Batna');
 Insert into city (city_id, city_name) values (6,'Bejaia');
 Insert into city (city_id, city_name) values (7,'Biskra');
 Insert into city (city_id, city_name) values (8,'Bechar');
-Insert into city (city_id, city_name) values (9,'Bl_ida');
+Insert into city (city_id, city_name) values (9,'Blida');
 Insert into city (city_id, city_name) values (10,'Bouira');
 Insert into city (city_id, city_name) values (11,'Tamanrasset');
 Insert into city (city_id, city_name) values (12,'Tebessa');
@@ -268,9 +268,9 @@ Insert into city (city_id, city_name) values (16,'Alger');
 Insert into city (city_id, city_name) values (17,'Djelfa');
 Insert into city (city_id, city_name) values (18,'Jijel');
 Insert into city (city_id, city_name) values (19,'Setif');
-Insert into city (city_id, city_name) values (20,'Sa_ida');
+Insert into city (city_id, city_name) values (20,'Saida');
 Insert into city (city_id, city_name) values (21,'Skikda');
-Insert into city (city_id, city_name) values (22,'S_idi Bel Abbes');
+Insert into city (city_id, city_name) values (22,'Sidi Bel Abbes');
 Insert into city (city_id, city_name) values (23,'Annaba');
 Insert into city (city_id, city_name) values (24,'Guelma');
 Insert into city (city_id, city_name) values (25,'Constantine');
@@ -282,8 +282,8 @@ Insert into city (city_id, city_name) values (30,'Ouargla');
 Insert into city (city_id, city_name) values (31,'Oran');
 Insert into city (city_id, city_name) values (32,'El Bayadh');
 Insert into city (city_id, city_name) values (33,'Illizi');
-Insert into city (city_id, city_name) values (34,'Bordj Bou Arrer_idj');
-Insert into city (city_id, city_name) values (35,'Boumerdes');
+Insert into city (city_id, city_name) values (34,'Bordj Bou Arreridj');
+Insert into city (city_id, city_name) values (35,'Boumerdas');
 Insert into city (city_id, city_name) values (36,'Tarf');
 Insert into city (city_id, city_name) values (37,'Tindouf');
 Insert into city (city_id, city_name) values (38,'Tissemsilt');

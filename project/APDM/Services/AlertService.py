@@ -4,6 +4,7 @@ from rest_framework.decorators import APIView
 from rest_framework.response import Response
 from APDM.models import *
 from APDM.serializers import *
+from APDM.Repository.GenericRepository import GenericRepository
 from rest_framework import permissions
 from rest_framework import generics, mixins
 import datetime
@@ -18,19 +19,19 @@ from rest_framework.permissions import IsAuthenticated
 class AlertByClient(generics.ListAPIView):
     authentication_classes = [OAuth2Authentication]
     permission_classes = [IsAuthenticated]
+    alertRepo = GenericRepository(Alert)
+    alertClientRepo = GenericRepository(AlertClient)
 
     def get(self, request, format=None):
-        try:
-            ids= AlertClient.objects.filter(client_id =request.user.client_id).values_list('alert_id', flat=True)
 
-            alerts = Alert.objects.filter(alert_id__in=ids).order_by('alert_date')
-            print alerts
-        except AlertClient.DoesNotExist:
-            return HttpResponse('not found')
+        print "userID", request.user.client_id
+        ids= self.alertClientRepo.filterBy("client_id", request.user.client_id,'alert_id')
+        print ids
+        alerts = self.alertRepo.filterBy("alert_id__in",ids, None)
 
         paginator = Paginator(alerts, 5)
         page = request.GET.get('page')
-        print("page",paginator.num_pages)
+        #print("page",paginator.num_pages)
 
         try:
             alerts = paginator.page(page)
@@ -66,16 +67,19 @@ class AlertByClient(generics.ListAPIView):
 class AlertList(generics.ListCreateAPIView):
     authentication_classes = [OAuth2Authentication]
     permission_classes = [IsAuthenticated]
-
-    queryset = Alert.objects.all()
+    alertRepo = GenericRepository(Alert)
+    queryset = alertRepo.getAll()
     serializer_class = AlertSerializer
 
 class ConfirmAlert(generics.RetrieveUpdateAPIView):
     authentication_classes = [OAuth2Authentication]
     permission_classes = [IsAuthenticated]
 
-    queryset = Alert.objects.all()
+    alertRepo = GenericRepository(Alert)
+    queryset = alertRepo.getAll()
+
     serializer_class = AlertSerializer
+
     lookup_field = 'pk'
     lookup_url_kwarg = 'pk'
 
@@ -104,8 +108,10 @@ class ConfirmAlert(generics.RetrieveUpdateAPIView):
 class DenyAlert(generics.RetrieveUpdateAPIView):
     authentication_classes = [OAuth2Authentication]
     permission_classes = [IsAuthenticated]
+    alertRepo = GenericRepository(Alert)
 
-    queryset = Alert.objects.all()
+    queryset = alertRepo.getAll()
+
     serializer_class = AlertSerializer
     lookup_field = 'pk'
     lookup_url_kwarg = 'pk'

@@ -16,7 +16,7 @@ urlpatterns = [
     url(r'^plots/(?P<pk>[0-9]+)$', PlotDetail.as_view()),
     url(r'^plotsbyfarm/(?P<farm>[0-9]+)$', PlotsByFarm.as_view()),
 
-    url(r'^cropproductions/$', CropProductionList.as_view()),
+    # url(r'^cropproductions/$', CropProductionList.as_view()),
     url(r'^cropproductions/(?P<pk>[0-9]+)$', CropProductionDetail.as_view()),
     url(r'^cropproductionsbyplot/(?P<plot>[0-9]+)$', CropProductionsByPlot.as_view()),
     url(r'^crop/client/$', CropProductionByClient.as_view()),
@@ -31,9 +31,10 @@ urlpatterns = [
 
     url(r'^riskrates/(?P<crop>[0-9]+)/(?P<disease>[0-9]+)$', RiskRates.as_view()),
     url(r'^riskratesbycrop/(?P<crop>[0-9]+)$', RiskRateByCrop.as_view()),
+    url(r'^currentriskrates/$', CurrentRiskRates.as_view()),
 
     url(r'^currentClient/', CurrentClient.as_view()),
-    url(r'^clientbyusername/(?P<username>.+)$', ClientByUsername.as_view()),
+    url(r'^clientbyusername/(?P<username>[a-zA-Z-0-9]+)$', ClientByUsername.as_view()),
     url(r'^updateProfile/(?P<pk>[0-9]+)$', UpdateProfile.as_view()),
     url(r'^changepswd/$', ChangePasswordView.as_view()),
 
