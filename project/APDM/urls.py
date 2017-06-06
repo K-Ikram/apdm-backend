@@ -25,6 +25,7 @@ urlpatterns = [
 
     url(r'^alerts/$', AlertList.as_view()),
     url(r'^alertsbyclient/$', AlertByClient.as_view()),
+    url(r'^nonconfirmedalerts/', NonConfirmedAlerts.as_view()),
     url(r'^alerts/(?P<pk>[0-9]+)/confirm', ConfirmAlert.as_view()),
     url(r'^alerts/(?P<pk>[0-9]+)/deny', DenyAlert.as_view()),
     url(r'^addAnomaly/$', AddAnomaly.as_view()),

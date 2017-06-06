@@ -31,17 +31,18 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
+    'APDM',
     'django.contrib.auth',
+    'django.contrib.humanize',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'APDM',
+    'django.contrib.admin',
     'rest_framework',
     'oauth2_provider',
     'corsheaders',
-    'djcelery',
+    # 'djcelery',
 ]
 
 MIDDLEWARE = [
@@ -62,8 +63,8 @@ ROOT_URLCONF = 'project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
+        'DIRS': ['/PFE/Developpement/apdm_server/apdm/project/APDM/template/'],
+        # 'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -152,19 +153,20 @@ OAUTH2_PROVIDER = {
 JSON_RPC_SERVER = 'http://localhost:8800'
 
 # CELERY STUFF
-import djcelery
-djcelery.setup_loader()
-BROKER_URL = 'redis://localhost:6379'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379'
-CELERY_ACCEPT_CONTENT = ['application/json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'
-CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+# import djcelery
+# djcelery.setup_loader()
+# BROKER_URL = 'redis://localhost:6379'
+# #CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+# CELERY_RESULT_BACKEND = 'djcelery.backends.database.DatabaseBackend'
+# CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+# CELERY_ACCEPT_CONTENT = ['application/json']
+# CELERY_TASK_SERIALIZER = 'json'
+# CELERY_RESULT_SERIALIZER = 'json'
+# CELERY_TIMEZONE = 'UTC'
 
 # CONFIGURE SMTP Server
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER ="*****"
-EMAIL_HOST_PASSWORD ="****"
+EMAIL_HOST_USER ="sarra93bouhenni"
+EMAIL_HOST_PASSWORD ="21111987sarra"

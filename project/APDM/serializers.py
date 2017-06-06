@@ -5,13 +5,7 @@ from models import *
 
 class DiseaseSerializer(serializers.ModelSerializer):
     crop = serializers.StringRelatedField()
-    @staticmethod
-    def setup_eager_loading(queryset):
-        """ Perform necessary eager loading of data. """
-        # select_related for "to-one" relationships
-        queryset = queryset.select_related('crop')
 
-        return queryset
     class Meta:
         model = Disease
         fields = '__all__'
@@ -21,12 +15,13 @@ class PlotSerializer(serializers.ModelSerializer):
         model = Plot
         fields = '__all__'
 
+class CropSerialiszer(serializers.ModelSerializer):
+    class Meta:
+        model = Crop
+        fields = '__all__'
+
 class CropProductionSerializer(serializers.ModelSerializer):
-    crop = serializers.StringRelatedField()
-    @staticmethod
-    def setup_eager_loading(queryset):
-        """ Perform necessary eager loading of data. """
-        return queryset
+    crop = CropSerialiszer(read_only=True)
 
     class Meta:
         model = CropProduction
@@ -35,21 +30,17 @@ class CropProductionSerializer(serializers.ModelSerializer):
 class FarmSerializer(serializers.ModelSerializer):
     class Meta:
         model = Farm
+        fields = '__all__'
 
+class CitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = City
         fields = '__all__'
 
 class AlertSerializer(serializers.ModelSerializer):
     disease = serializers.StringRelatedField()
     client = serializers.StringRelatedField()
     crop_production = serializers.StringRelatedField()
-    @staticmethod
-    def setup_eager_loading(queryset):
-        """ Perform necessary eager loading of data. """
-        # select_related for "to-one" relationships
-        queryset = queryset.select_related('disease')
-        queryset = queryset.select_related('client')
-        queryset = queryset.select_related('crop_production')
-        return queryset
 
     class Meta:
         model = Alert
@@ -68,12 +59,6 @@ class CropClientSerializer(serializers.ModelSerializer):
 
 class AlertClientSerializer(serializers.ModelSerializer):
     alert_id = AlertSerializer(read_only=True)
-    @staticmethod
-    def setup_eager_loading(queryset):
-        """ Perform necessary eager loading of data. """
-        # select_related for "to-one" relationships
-        queryset = queryset.select_related('alert_id')
-        return queryset
 
     class Meta:
         model = AlertClient

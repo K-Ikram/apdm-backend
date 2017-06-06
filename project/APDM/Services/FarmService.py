@@ -23,7 +23,7 @@ class FarmList(generics.ListCreateAPIView):
         farms= self.farmRepo.filterBy("clients",request.user,None) # get the farms owned by this user
         serializer = FarmSerializer(farms, many=True)
         return Response(serializer.data)
-
+        
 class FarmDetail(generics.RetrieveUpdateDestroyAPIView):
     authentication_classes = [OAuth2Authentication]
     permission_classes = [IsAuthenticated]

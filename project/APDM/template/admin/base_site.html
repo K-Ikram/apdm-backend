@@ -1,0 +1,36 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ title }} |  APDM Admin{% endblock %}
+{% block extrastyle %}
+<!--<script src="https://use.fontawesome.com/9333a3980f.js"></script>-->
+  <style>
+  #header{
+    background-color: #57BC90;
+    height: 10%;
+  }
+  .module h2, .module caption, .inline-group h2 {
+    background-color: #015249 !important;
+
+  }
+  #content-related .module h2{
+
+    color: #f3f1ff;
+  }
+
+  #branding h1, #branding h1 a:link, #branding h1 a:visited {
+    color: #fff;
+    margin-top:0%;
+
+}
+.h1, h1 {
+    font-size: 30px !important;
+}
+
+</style>
+
+{% endblock %}
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}"> <i class="fa fa-cogs" aria-hidden="true"></i>  APDM Administration</a></h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

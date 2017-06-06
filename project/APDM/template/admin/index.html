@@ -1,0 +1,271 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}" />{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+<script src="https://use.fontawesome.com/9333a3980f.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+
+<style>
+tr:hover{
+  background-color: #f1f2f7;
+  cursor: pointer;
+  color:#444444;
+}
+tr:hover a{
+  color:#444444;
+}
+a:link, a:visited {
+    color: #444444;
+    text-decoration: none;
+    font-weight: normal;
+
+}
+#model_name{
+  font-size: 16px;
+  padding-left: 10px;
+}
+
+.btn-success{
+  margin-top: -5%;
+  margin-bottom: 10%;
+}
+.section:link, a.section:visited {
+    color: #fff;
+    text-decoration: none;
+    font-size: 15px;
+    padding-left: 1%;
+}
+.dashboard .module table th {
+    width: 100%;
+    height: 40px;
+}
+body{
+
+
+}
+#btn{
+  background-color: #79aec8;
+  border-color:#79aec8;
+  margin-right: 5px;
+
+}
+#btn:hover{
+  background-color: #a5a5af;
+  border-color: #a5a5af;
+}
+td, th {
+    /* padding: 0; */
+    padding-top: 3%;
+    padding-right: 1%;
+}
+#icon-actions{
+  margin-left: -15px !important;
+  margin-right: 2px;
+}
+
+#hidden{
+  visibility: hidden;
+}
+
+</style>
+
+{% if app_list %}
+    {% for app in app_list %}
+
+    {% if app.app_label != "oauth2_provider"%}
+
+        <div class="app-{{ app.app_label }} module">
+        <table>
+        <caption>
+          {% if app.app_label == "auth" %}
+          <a href="{{ app.app_url }}" class="section" title="{% blocktrans with name=app.name %}Models in the {{ name }} application{% endblocktrans %}">Groupes & permissions</a>
+      {% else %}
+        {% if app.app_label == "APDM" %}
+            <a href="{{ app.app_url }}" class="section" title="{% blocktrans with name=app.name %}Models in the {{ name }} application{% endblocktrans %}">Gestion des fermes</a>
+        {% else %}
+          {% if app.app_label == "djcelery" %}
+              <a href="{{ app.app_url }}" class="section" title="{% blocktrans with name=app.name %}Models in the {{ name }} application{% endblocktrans %}">Gestion du prédicteur</a>
+          {% endif %}
+        {% endif%}
+
+      {% endif %}
+        </caption>
+        {% for model in app.models %}
+          {% if model.object_name != "Client" and model.object_name != "AlertSummary" and model.object_name != "AnomalySummary" and model.object_name != "CrontabSchedule" and model.object_name != "IntervalSchedule" and model.object_name != "WorkerState" %}
+
+
+                <tr class="model-{{ model.object_name|lower }}" >
+
+                {% if model.admin_url %}
+                  {% if model.object_name == "AlertSummary" %}
+
+                    <td><i id ="{{model.object_name}}" aria-hidden="true" style="padding-left:10px" ></i></td>
+                    <th scope="row" onclick="location.href='{{ model.admin_url }}';"><a href="{{ model.admin_url }}"  id="model_name">Statistiques sur les alertes</a></th>
+                  {% else %}
+                    {% if model.object_name == "AnomalySummary" %}
+
+                      <td><i id ="{{model.object_name}}" aria-hidden="true" style="padding-left:10px" ></i></td>
+                      <th scope="row" onclick="location.href='{{ model.admin_url }}';"><a href="{{ model.admin_url }}"  id="model_name">Statistiques sur les anomalies</a></th>
+                    {% else %}
+                      {% if model.object_name == "PeriodicTask" %}
+
+                        <td><i id ="{{model.object_name}}" aria-hidden="true" style="padding-left:10px" ></i></td>
+                        <th scope="row" onclick="location.href='{{ model.admin_url }}';"><a href="{{ model.admin_url }}"  id="model_name">Prévisions périodiques</a></th>
+
+                      {%else%}
+                        {% if model.object_name == "TaskState" %}
+
+                          <td><i id ="{{model.object_name}}" aria-hidden="true" style="padding-left:10px" ></i></td>
+                          <th scope="row" onclick="location.href='{{ model.admin_url }}';"><a href="{{ model.admin_url }}"  id="model_name">Résultats de prévisions périodiques</a></th>
+
+                        {%else%}
+
+                          <td><i id ="{{model.object_name}}" aria-hidden="true" style="padding-left:10px" ></i></td>
+                          <th scope="row" onclick="location.href='{{ model.admin_url }}';"><a href="{{ model.admin_url }}"  id="model_name">{{ model.name }}</a></th>
+                          {% endif %}
+                      {% endif %}
+                    {% endif%}
+                  {% endif %}
+
+                {% else %}
+                    <th scope="row" id="model_name">{{ model.name }}</th>
+                {% endif %}
+
+                {% if model.add_url %}
+                    <td>
+                      <button class="btn btn-success" onclick="location.href='{{model.add_url}}';" id="btn">{% trans 'Add' %}</button>
+
+                    </td>
+                {% else %}
+                    <td><button class="btn btn-success" id="hidden" >ajouter</button></td>
+                {% endif %}
+
+
+                </tr>
+
+            {%endif%}
+        {% endfor %}
+        {% if app.app_label == "auth"%}
+
+              <tr class="model-client" >
+                  <td><i id ="Client" aria-hidden="true" style="padding-left:10px" ></i></td>
+                  <th scope="row" onclick="location.href='/admin/APDM/client/';"><a href="/admin/APDM/client/"  id="model_name">Utilisateurs</a></th>
+
+                  <td>
+                    <button class="btn btn-success" onclick="location.href='/admin/APDM/client/add/';" id="btn">{% trans 'Add' %}</button>
+                  </td>
+
+              </tr>
+        {% else %}
+            {% if app.app_label == "djcelery"%}
+
+                  <tr class="model-alertsummary" >
+                      <td><i class="glyphicon glyphicon-stats fa-lg" id ="AlertSummary" aria-hidden="true" style="padding-left:10px" ></i></td>
+                      <th scope="row" onclick="location.href='/admin/APDM/alertsummary/';"><a href="/admin/APDM/alertsummary/"  id="model_name">Statistiques sur les alertes</a></th>
+                      <td><button class="btn btn-success" id="hidden" >ajouter</button></td>
+                  </tr>
+
+                  <tr class="model-anomalysummary" >
+                      <td><i class="glyphicon glyphicon-stats fa-lg" aria-hidden="true" style="padding-left:10px" ></i></td>
+                      <th scope="row" onclick="location.href='/admin/APDM/anomalysummary/';"><a href="/admin/APDM/anomalysummary/"  id="model_name">Statistiques sur les anomalies</a></th>
+                      <td><button class="btn btn-success" id="hidden" >ajouter</button></td>
+                  </tr>
+
+              {% endif %}
+
+          {% endif %}
+
+        </table>
+        </div>
+      {% endif %}
+    {% endfor %}
+{% else %}
+    <p>{% trans "You don't have permission to edit anything." %}</p>
+{% endif %}
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<div id="content-related">
+    <div class="module" id="recent-actions-module">
+        <h2>{% trans 'Recent actions' %}</h2>
+        <h3>{% trans 'My actions' %}</h3>
+            {% load log %}
+            {% get_admin_log 10 as admin_log for_user user %}
+            {% if not admin_log %}
+            <p>{% trans 'None available' %}</p>
+            {% else %}
+            <ul class="actionlist">
+            {% for entry in admin_log %}
+            <li ><i class="{% if entry.is_addition %}fa fa-plus{% endif %}{% if entry.is_change %}fa fa-pencil{% endif %}{% if entry.is_deletion %}fa fa-remove{% endif %}" aria-hidden="true"  id="icon-actions"></i>
+
+                {% if entry.is_deletion or not entry.get_admin_url %}
+                    {{ entry.object_repr }}
+                {% else %}
+                    <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
+                {% endif %}
+                <br/>
+                {% if entry.content_type %}
+                    <span class="mini quiet">{% filter capfirst %}{{ entry.content_type }}{% endfilter %}</span>
+                {% else %}
+                    <span class="mini quiet">{% trans 'Unknown content' %}</span>
+                {% endif %}
+            </li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+    </div>
+</div>
+<script>
+
+d= document.getElementById("Alert");
+if (d != null){
+  d.className="fa fa-bell-o fa-lg";
+}
+d= document.getElementById("Group");
+if (d != null){
+  d.className="fa fa-users fa-lg";
+}
+d= document.getElementById("Client");
+if (d != null){
+  d.className="fa fa-user-circle-o fa-lg";
+}
+d= document.getElementById("TaskState");
+if (d != null){
+  d.className="fa fa-tasks fa-lg";
+}
+d= document.getElementById("PeriodicTask");
+if (d != null){
+  d.className="fa fa-clock-o fa-lg";
+}
+d= document.getElementById("CropProduction");
+if (d != null){
+  d.className="fa fa-pagelines fa-lg";
+}
+d= document.getElementById("Anomaly");
+if (d != null){
+  d.className="fa fa-flag fa-lg";
+}
+d= document.getElementById("Sensor");
+if (d != null){
+  d.className="fa fa-thermometer-half fa-lg";
+}
+d= document.getElementById("Farm");
+if (d != null){
+  d.className="fa fa-tree fa-lg";
+}
+d= document.getElementById("Plot");
+if (d != null){
+  d.className="fa fa-leaf fa-lg";
+}
+</script>
+{% endblock %}

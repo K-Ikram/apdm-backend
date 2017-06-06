@@ -28,3 +28,9 @@ class GenericRepository(IGenericRepository):
             return self.classname.objects.filter(**{field_name: field_value})
         else:
             return self.classname.objects.filter(**{field_name: field_value}).values_list(column, flat=True)
+
+    def filterByWithOrder(self, field_name, field_value, column, order_column):
+        if(column is None):
+            return self.classname.objects.filter(**{field_name: field_value}).order_by(order_column)
+        else:
+            return self.classname.objects.filter(**{field_name: field_value}).values_list(column, flat=True).order_by(order_column)

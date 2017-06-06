@@ -7,6 +7,7 @@ from django.conf import settings
 from django.db.models import signals
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
+from emailing import *
 # Create your models here.
 
 
@@ -17,7 +18,7 @@ class City(models.Model):
     class Meta:
         verbose_name = 'Ville'
         verbose_name_plural = 'Villes'
-        managed = False
+
         db_table = 'city'
     def __unicode__(self):
         return self.city_name
@@ -88,18 +89,22 @@ class Sensor(models.Model):
         verbose_name = 'Capteur'
         verbose_name_plural = 'Capteurs'
         managed = False
+
         db_table = 'sensor'
     def __unicode__(self):
         return self.sensor_type
 
+SOILTYPECHOICE= (
+    ('aride', 'Aride'),
+    ('semi-aride', 'Semi-aride'),
+)
+
 class Plot(models.Model):
    plot_id = models.AutoField(primary_key=True)
    plot_name = models.CharField(max_length=50, verbose_name="Nom de la parcelle")
-   latitude_n = models.FloatField(verbose_name="Lat Nord")
-   longitude_n = models.FloatField(verbose_name="Long Nord")
-   latitude_s = models.FloatField(verbose_name="Lat Sud")
-   longitude_s = models.FloatField(verbose_name="Long Sud")
-   soil_type = models.CharField(max_length=10, blank=True, null=True, verbose_name="Type de sol")
+   latitude = models.FloatField(verbose_name="Latitude")
+   longitude = models.FloatField(verbose_name="Longitude")
+   soil_type = models.CharField(max_length=10, blank=True,choices=SOILTYPECHOICE, null=True, verbose_name="Type de sol")
    farm = models.ForeignKey('Farm', verbose_name="Ferme")
    comments = models.CharField(max_length=50, blank=True, null=True, verbose_name="Commentaires")
    sensors = models.ManyToManyField(Sensor, through = 'SensorPlot', verbose_name="Capteurs associés")
@@ -108,6 +113,7 @@ class Plot(models.Model):
         verbose_name = 'Parcelle'
         verbose_name_plural = 'Parcelles'
         managed = False
+
         db_table = 'plot'
    def __unicode__(self):
         return self.plot_name
@@ -123,11 +129,13 @@ class SensorPlot(models.Model):
 
 class Crop(models.Model):
     crop_id = models.AutoField(primary_key=True)
-    crop_name = models.CharField(max_length=50, verbose_name="Type de culture")
+    crop_name = models.TextField(verbose_name="Type de culture")
+    crop_description = models.TextField(verbose_name="Description de la culture")
     class Meta:
         verbose_name = 'Type de culture'
         verbose_name_plural = 'Types de cultures'
         managed = False
+
         db_table = 'crop'
 
     def __unicode__(self):
@@ -135,12 +143,14 @@ class Crop(models.Model):
 
 class Disease(models.Model):
     disease_id = models.AutoField(primary_key=True)
-    disease_name = models.CharField(max_length=50, verbose_name="Nom de la maladie")
+    disease_name = models.TextField(verbose_name="Nom de la maladie")
+    disease_description = models.TextField(verbose_name="Déscription de la maladie")
     crop=models.ForeignKey('Crop',on_delete=models.CASCADE, verbose_name="Type de cultures concernées")
     class Meta:
         verbose_name = 'Maladie'
         verbose_name_plural = 'Maladies'
         managed = False
+
         db_table = 'disease'
     def __unicode__(self):
         return self.disease_name
@@ -158,9 +168,10 @@ class CropProduction(models.Model):
     diseases = models.ManyToManyField(Disease, through = 'CropProductionDisease', verbose_name="Maladies surveillées")
 
     class Meta:
-        managed = False
+
         verbose_name = 'Culture'
         verbose_name_plural = 'Cultures'
+        managed = False
         db_table = 'crop_production'
 
     def __unicode__(self):
@@ -200,7 +211,14 @@ class Alert(models.Model):
         verbose_name = 'Alerte'
         verbose_name_plural = 'Alertes'
         managed = False
+
         db_table = 'alert'
+
+class AlertSummary(Alert):
+    class Meta:
+        proxy = True
+        verbose_name = 'Alert Summary'
+        verbose_name_plural = 'Alerts Summary'
 
 class Anomaly(models.Model):
     anomaly_id = models.AutoField(primary_key=True)
@@ -214,7 +232,14 @@ class Anomaly(models.Model):
         verbose_name = 'Anomalie'
         verbose_name_plural = 'Anomalies'
         managed = False
+
         db_table = 'anomaly'
+
+class AnomalySummary(Anomaly):
+    class Meta:
+        proxy = True
+        verbose_name = 'Anomaly Summary'
+        verbose_name_plural = 'Anomalies Summary'
 
 class CropClient(models.Model):
 
@@ -223,6 +248,7 @@ class CropClient(models.Model):
 
     class Meta:
         managed = False
+
         db_table = 'crop_client'
 
 class AlertClient(models.Model):
@@ -232,16 +258,8 @@ class AlertClient(models.Model):
 
     class Meta:
         managed = False
+
         db_table = 'alert_client'
 
-def welcome_new_user(sender, instance, created, **kwargs):
-    '''Welcome the new client by sending him an email.'''
-    if created:
-        print "created a new user"
-        subject = 'Bienvenue à la plateforme APDM'
-        message = 'Bonjour cher client '+instance.username+' \nVous pouvez désormais vous connecter à la plateforme APDM en utilisant les informations de connexion suivantes : \nNom d\'utilisateur : '+ instance.username+'\nMot de passe : aitech'+instance.username+'\n\n Accéder à la plateforme à partir du lien suivant : http://localhost:4200/login'
-        from_addr = 'no-reply@example.com'
-        recipient_list = (instance.email,)
-        send_mail(subject, message, from_addr, recipient_list,fail_silently=False)
 
-signals.post_save.connect(welcome_new_user, sender=Client)
+#signals.post_save.connect(welcome_new_user, sender=Client)

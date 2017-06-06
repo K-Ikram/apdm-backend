@@ -18,14 +18,18 @@ app = Celery('project')
 app.config_from_object('django.conf:settings')
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
-@app.task()
-def forecastDisease(disease_id):
-    server = jsonrpclib.Server(settings.JSON_RPC_SERVER)
-    server.launchDiseaseForecasting(disease_id)
-    logger.info("Running Predictor")
+@app.task(bind=True)
+def printText():
+    print "hello from celery job"
 
-@app.task()
-def trueNegatives(disease_id):
-    server = jsonrpclib.Server(settings.JSON_RPC_SERVER)
-    server.launchDiseaseForecasting(disease_id)
-    logger.info("Running Predictor")
+# @app.task()
+# def forecastDisease(disease_id):
+#     server = jsonrpclib.Server(settings.JSON_RPC_SERVER)
+#     server.launchDiseaseForecasting(disease_id)
+#     logger.info("Running Predictor")
+#
+# @app.task()
+# def trueNegatives(disease_id):
+#     server = jsonrpclib.Server(settings.JSON_RPC_SERVER)
+#     server.launchDiseaseForecasting(disease_id)
+#     logger.info("Running Predictor")

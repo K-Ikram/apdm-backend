@@ -1,0 +1,194 @@
+{% load i18n static %}<!DOCTYPE html>
+{% get_current_language as LANGUAGE_CODE %}{% get_current_language_bidi as LANGUAGE_BIDI %}
+<html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
+<head>
+  <script src="https://use.fontawesome.com/9333a3980f.js"></script>
+
+<title>{% block title %}{% endblock %}</title>
+<link rel="stylesheet" type="text/css" href="{% block stylesheet %}{% static "admin/css/base.css" %}{% endblock %}" />
+{% block extrastyle %}{% endblock %}
+{% if LANGUAGE_BIDI %}<link rel="stylesheet" type="text/css" href="{% block stylesheet_rtl %}{% static "admin/css/rtl.css" %}{% endblock %}" />{% endif %}
+{% block extrahead %}{% endblock %}
+{% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE" />{% endblock %}
+</head>
+{% load i18n %}
+
+<body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}"
+  data-admin-utc-offset="{% now "Z" %}">
+
+<style>
+
+#user-tools a:focus, #user-tools a:hover{
+  color:#fff;
+  border-bottom-color:#fff;
+}
+.h1, h1 {
+    font-size: 30px !important;
+}
+td, th {
+    padding: 20px ;
+    font-size: 14px;
+}
+a:link, a:visited {
+    color: #444444;
+    text-decoration: none;
+}
+table thead th .text a {
+    display: block;
+    cursor: pointer;
+    padding: 8px 0px;
+}
+thead th a:link, thead th a:visited {
+    color: #257147;
+    font-size: 12px;
+}
+
+.Administration{
+  padding: 20px;
+  margin-left: 15%;
+}
+div.breadcrumbs {
+    background: #77C9d4;
+  }
+#header {
+    background-color: #57BC90;
+    color: #fff;
+}
+#header a:link, #header a:visited {
+  padding:5px;
+  margin-right: 10px;
+}
+
+fieldset.collapsed .collapse-toggle {
+    background: transparent;
+    display: inline;
+    color: #e5e279;
+}
+b, strong {
+  font-size: 14px;
+  margin-right: 30px;
+}
+fieldset.collapsed h2 {
+    background: #f8f8f8;
+    color: #fff;
+}
+.object-tools a:link, .object-tools a:visited{
+  margin-top: 20%;
+}
+</style>
+<!-- Container -->
+<div id="container">
+
+    {% if not is_popup %}
+    <!-- Header -->
+    <div id="header" >
+        <div id="branding">
+        {% block branding %}{% endblock %}
+        </div>
+        {% block usertools %}
+        {% if has_permission %}
+        <div id="user-tools">
+            {% block welcome-msg %}
+                {% trans 'Welcome,' %}
+                <strong>{% firstof user.get_short_name user.get_username %}</strong>.
+            {% endblock %}
+            {% block userlinks %}
+                {% if site_url %}
+              <i class="fa fa-home fa-lg" aria-hidden="true"></i><a href="{{ site_url }}"> {% trans 'View site' %}</a>
+                {% endif %}
+                {% if user.is_active and user.is_staff %}
+                    {% url 'django-admindocs-docroot' as docsroot %}
+                    {% if docsroot %}
+                        <a href="{{ docsroot }}">{% trans 'Documentation' %}</a>
+                    {% endif %}
+                {% endif %}
+                {% if user.has_usable_password %}
+                <i class="fa fa-pencil fa-lg" aria-hidden="true"></i><a href="{% url 'admin:password_change' %}">{% trans 'Change password' %}</a>
+                {% endif %}
+                <i class="fa fa-sign-out fa-lg" aria-hidden="true"></i><a href="{% url 'admin:logout' %}">{% trans 'Log out' %}</a>
+            {% endblock %}
+        </div>
+        {% endif %}
+        {% endblock %}
+        {% block nav-global %}{% endblock %}
+    </div>
+    <!-- END Header -->
+    {% block breadcrumbs %}
+    <div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+    {% if title %} &rsaquo; {{ title }}{% endif %}
+    </div>
+    {% endblock %}
+    {% endif %}
+
+    {% block messages %}
+        {% if messages %}
+        <ul class="messagelist">{% for message in messages %}
+          <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|capfirst }}</li>
+        {% endfor %}</ul>
+        {% endif %}
+    {% endblock messages %}
+
+    <!-- Content -->
+    <div id="content" class="{{title}}" class="{% block coltype %}colM{% endblock %}">
+        {% block pretitle %}{% endblock %}
+        {% block content_title %}
+        {% if title == "Modification de Alerte" %} <h1><i class="fa fa-bell-o" aria-hidden="true"></i> Détails de l'alerte </h1>{% endif %}
+        {% if title == "Modification de Anomalie" %} <h1><i class="fa fa-flag fa-lg" aria-hidden="true"></i> Détails de l'anomalie </h1>{% endif %}
+
+        {% if title == "Sélectionnez l'objet Alerte à changer" %}<h2> <i class="fa fa-bell-o" aria-hidden="true"></i> Liste des alertes </h2> {% endif %}
+        {% if title == "Sélectionnez l'objet Anomalie à changer" %}<h2><i class="fa fa-flag" aria-hidden="true"></i>  Liste des anomalies </h2> {% endif %}
+        {% if title == "Administration de Apdm" %}<h1><i class="fa fa-wrench" aria-hidden="true"></i>  Administration de Apdm </h1> {% endif %}
+        {% if title == "Administration du site" %}<h1 style="margin-bottom: 5%;"><i class="fa fa-wrench" aria-hidden="true"></i>  Administration de Apdm </h1> {% endif %}
+        {% if title == "Sélectionnez l'objet Capteur à changer" %}<h2><i class="fa fa-thermometer-half" aria-hidden="true"></i>  Liste des capteurs </h2> {% endif %}
+        {% if title == "Sélectionnez l'objet Culture à changer" %}<h2><i class="fa fa-pagelines" aria-hidden="true"></i>  Liste des cultures </h2> {% endif %}
+
+        {% if title == "Modification de Ferme" %}<h1><i class="fa fa-tree" aria-hidden="true"></i>  Détails de la ferme </h1> {% endif %}
+        {% if title == "Modification de Utilisateur" %}<h1><i class="fa fa-user-circle-o" aria-hidden="true"></i>  Profil de l'utilisateur </h1> {% endif %}
+        {% if title == "Modification de Parcelle" %}<h1><i class="fa fa-user-circle-o" aria-hidden="true"></i>  Détails de la parcelle </h1> {% endif %}
+
+        {% if title == "Sélectionnez l'objet Ferme à changer" %}<h2><i class="fa fa-tree" aria-hidden="true"></i>  Liste des fermes </h2> {% endif %}
+        {% if title == "Sélectionnez l'objet Parcelle à changer" %}<h2><i class="fa fa-leaf" aria-hidden="true"></i>  Liste des parcelles </h2> {% endif %}
+        {% endblock %}
+        {% block content %}
+        {% block object-tools %}{% endblock %}
+        {{ content }}
+        {% endblock %}
+        {% block sidebar %}{% endblock %}
+        <br class="clear" />
+    </div>
+    <!-- END Content -->
+
+    {% block footer %}<div id="footer"></div>{% endblock %}
+</div>
+<!-- END Container -->
+
+</body>
+</html>
+<script>
+d= document.getElementById("Alert");
+if (d != null){
+  d.className="fa fa-bell-o fa-lg";
+}
+
+d= document.getElementById("CropProduction");
+if (d != null){
+  d.className="fa fa-pagelines fa-lg";
+}
+d= document.getElementById("Anomaly");
+if (d != null){
+  d.className="fa fa-flag fa-lg";
+}
+d= document.getElementById("Sensor");
+if (d != null){
+  d.className="fa fa-thermometer-half fa-lg";
+}
+d= document.getElementById("Farm");
+if (d != null){
+  d.className="fa fa-tree fa-lg";
+}
+d= document.getElementById("Plot");
+if (d != null){
+  d.className="fa fa-leaf fa-lg";
+}
+</script>

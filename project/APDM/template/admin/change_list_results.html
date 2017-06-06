@@ -1,0 +1,62 @@
+{% load i18n static %}
+<script src="https://use.fontawesome.com/9333a3980f.js"></script>
+
+<style>
+
+td, th {
+    padding: 10px !important;
+    font-size: 14px;
+}
+a:link, a:visited {
+    color: #444444;
+    text-decoration: none;
+}
+table thead th .text a {
+    display: block;
+    cursor: pointer;
+    padding: 8px 0px;
+}
+thead th a:link, thead th a:visited {
+    color: #257147;
+    font-size: 12px;
+}
+</style>
+{% if result_hidden_fields %}
+<div class="hiddenfields">{# DIV for HTML validation #}
+{% for item in result_hidden_fields %}{{ item }}{% endfor %}
+</div>
+{% endif %}
+{% if results %}
+<div class="results">
+<table id="result_list">
+<thead>
+<tr>
+{% for header in result_headers %}
+<th scope="col" {{ header.class_attrib }}>
+   {% if header.sortable %}
+     {% if header.sort_priority > 0 %}
+       <div class="sortoptions">
+         <a class="sortremove" href="{{ header.url_remove }}" title="{% trans "Remove from sorting" %}"></a>
+         {% if num_sorted_fields > 1 %}<span class="sortpriority" title="{% blocktrans with priority_number=header.sort_priority %}Sorting priority: {{ priority_number }}{% endblocktrans %}">{{ header.sort_priority }}</span>{% endif %}
+         <a href="{{ header.url_toggle }}" class="toggle {% if header.ascending %}ascending{% else %}descending{% endif %}" title="{% trans "Toggle sorting" %}"></a>
+       </div>
+     {% endif %}
+   {% endif %}
+   <div class="text">{% if header.sortable %}<a href="{{ header.url_primary }}">{{ header.text|capfirst }}</a>{% else %}<span>{{ header.text|capfirst }}</span>{% endif %}</div>
+   <div class="clear"></div>
+</th>{% endfor %}
+</tr>
+</thead>
+<tbody>
+{% for result in results %}
+{% if result.form.non_field_errors %}
+    <tr><td colspan="{{ result|length }}">{{ result.form.non_field_errors }}</td></tr>
+{% endif %}
+<tr class="{% cycle 'row1' 'row2' %} " >{% for item in result %}{{item}}{% endfor %}</tr>
+{% endfor %}
+</tbody>
+</table>
+
+</div>
+
+{% endif %}

@@ -27,7 +27,7 @@ class AlertByClient(generics.ListAPIView):
         print "userID", request.user.client_id
         ids= self.alertClientRepo.filterBy("client_id", request.user.client_id,'alert_id')
         print ids
-        alerts = self.alertRepo.filterBy("alert_id__in",ids, None)
+        alerts = self.alertRepo.filterByWithOrder("alert_id__in",ids, None,'-alert_date')
 
         paginator = Paginator(alerts, 5)
         page = request.GET.get('page')
@@ -63,6 +63,19 @@ class AlertByClient(generics.ListAPIView):
         "previous":_previous,
         "next":_next}
         )
+
+class NonConfirmedAlerts(APIView):
+     authentication_classes = [OAuth2Authentication]
+     permission_classes = [IsAuthenticated]
+     alertClientRepo = GenericRepository(AlertClient)
+     alertRepo = GenericRepository(Alert)
+
+     def get(self, request, format=None):
+        ids= self.alertClientRepo.filterBy("client_id", request.user.client_id,'alert_id')
+        alerts = Alert.objects.filter(feedback_type=None, alert_id__in=ids).order_by("-alert_date")
+
+        serializer = AlertSerializer(alerts, many=True)
+        return Response(serializer.data)
 
 class AlertList(generics.ListCreateAPIView):
     authentication_classes = [OAuth2Authentication]

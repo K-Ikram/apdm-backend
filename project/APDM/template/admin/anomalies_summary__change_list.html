@@ -1,0 +1,73 @@
+{% extends "admin/change_list.html" %}
+
+{% block content_title %}
+      <h2><i class="fa fa-bar-chart fa-lg" aria-hidden="true"></i>  Statistiques sur les anomalies </h2>
+{% endblock %}
+{% block result_list %}
+{% load humanize %}
+{{ my_num|intcomma }}
+{% load staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static "css/summary.css" %}" />
+<script src="https://use.fontawesome.com/9333a3980f.js"></script>
+
+<div class=”results”>
+<table id="summary">
+
+<thead>
+  <tr>
+    <th>
+      <div class=”text”>
+        <a href=”#”>Maladie</a>
+      </div>
+    </th>
+    <th>
+      <div class=”text”>
+        <a href=”#”>Total</a>
+      </div>
+    </th>
+
+  </tr>
+</thead>
+<tbody>
+  {% for row in summary %}
+  <tr >
+    <td> {{ row.disease }} </td>
+    <td> {{ row.total }} </td>
+
+
+  </tr>
+  {% endfor %}
+</tbody>
+<tr style=”font-weight:bold; border-top:10px solid #DDDDDD;”>
+           <td> Total </td>
+           <td> {{ summary_total.total }} </td>
+
+       </tr>
+</table>
+<h2 id="anomaly_time"> Les anomalies à travers le temp </h2>
+
+<div class='my-legend'>
+
+<div class='legend-scale'>
+  <ul class='legend-labels'>
+    <li style="font-family: Roboto,Lucida Grande,DejaVu Sans,Bitstream Vera Sans,Verdana,Arial,sans-serif; font-size: 90%;"><span style='background:#4897D8;'></span>Fusariose du blé</li>
+    <li style="font-family: Roboto,Lucida Grande,DejaVu Sans,Bitstream Vera Sans,Verdana,Arial,sans-serif; font-size: 90%;"><span style='background:#F9A603;'></span>Mildiou de la pomme de terre</li>
+
+  </ul>
+
+</div>
+</div>
+<div class="bar-chart">
+{% for x in summary_over_time %}
+
+    <div class="bar" style="height:{{x.pct}}%;background-color:{{x.color}}">
+      <div  class="bar-tooltip">
+        {{x.period | date:"Y"}}        total: {{x.total}}
+      </div>
+    </div>
+
+{% endfor %}
+</div>
+
+{% endblock %}
+{% block pagination %}{% endblock %}
