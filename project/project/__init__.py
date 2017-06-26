@@ -1,5 +1,8 @@
-# from __future__ import absolute_import
+from __future__ import absolute_import
+from project.celery import app as celery_app
+import sys
 
-# from project.celery import app as celery_app
+reload(sys)
+sys.setdefaultencoding('utf8')
 
-# __all__ = ['celery_app']
+__all__ = ['celery_app']

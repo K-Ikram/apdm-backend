@@ -5,6 +5,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from django.db.models import signals
+
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from emailing import *
@@ -35,6 +36,7 @@ LANGUAGECHOICE = (
     ('spanish','Espagnol'),
     ('german','Allmand'),
 )
+
 class Client(AbstractUser):
     client_id = models.AutoField(primary_key=True)
     gender = models.CharField(max_length=5, choices=GENDERCHOICE,blank=True, null=True,verbose_name="genre")
@@ -252,14 +254,9 @@ class CropClient(models.Model):
         db_table = 'crop_client'
 
 class AlertClient(models.Model):
-
     client_id  = models.IntegerField(primary_key = True)
     alert_id= models.IntegerField(primary_key = True)
 
     class Meta:
         managed = False
-
         db_table = 'alert_client'
-
-
-#signals.post_save.connect(welcome_new_user, sender=Client)

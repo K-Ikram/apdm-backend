@@ -1,7 +1,9 @@
 {% extends "admin/base.html" %}
+{% load staticfiles %}
 
-{% block title %}{{ title }} |  APDM Admin{% endblock %}
+{% block title %}{{ title }} |  Administration{% endblock %}
 {% block extrastyle %}
+
 <!--<script src="https://use.fontawesome.com/9333a3980f.js"></script>-->
   <style>
   #header{
@@ -30,7 +32,7 @@
 
 {% endblock %}
 {% block branding %}
-<h1 id="site-name"><a href="{% url 'admin:index' %}"> <i class="fa fa-cogs" aria-hidden="true"></i>  APDM Administration</a></h1>
+<h1 id="site-name"><a href="{% url 'admin:index' %}"> <img src="{% static "images/logo.png" %}"/></a></h1>
 {% endblock %}
 
 {% block nav-global %}{% endblock %}

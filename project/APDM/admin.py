@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.contrib import admin
 from .models import *
+from django import forms
 from django.db.models import Count, Min, Max
 from django.db.models.functions import Trunc
 from django.db.models import DateTimeField
@@ -16,10 +17,23 @@ def password_generator(size=8, chars=string.ascii_uppercase + string.digits+stri
 SIZE_LISTE_PER_PAGE = 10
 SIZE_LISTE_SHOW_ALL = 20
 
+class CropProductionDiseaseForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+		super(CropProductionDiseaseForm, self).__init__(*args, **kwargs)
+		print self.fields
+		if self.instance:
+			try:
+				self.fields['disease'].queryset = Disease.objects.filter(crop=self.instance.crop_production.crop)
+			except Disease.DoesNotExist:
+				pass
+    class Meta:
+        model = CropProductionDisease
+        exclude = []
+
 class CropProductionDiseaseInline(admin.TabularInline):
-    model = CropProductionDisease
-    classes = ['collapse']
-    extra = 1
+	model = CropProductionDisease
+	classes = ['collapse']
+	extra = 1
 
 class CropProductionSensorInline(admin.TabularInline):
     model = CropProductionSensor
@@ -33,8 +47,7 @@ class SensorPlotInline(admin.TabularInline):
 
 class OwnfarmInline(admin.TabularInline):
     model = Ownfarm
-    extra = 1
-
+    extra = 0
 
 class PlotInline(admin.TabularInline):
     model = Plot
@@ -52,7 +65,6 @@ class AddPlotInline(admin.StackedInline):
     extra = 1
     def has_change_permission(self, request):
         return False
-
 
 class CropProductionInline(admin.TabularInline):
     model = CropProduction
@@ -74,12 +86,12 @@ class AddCropProductionInline(admin.StackedInline):
         return False
 
 class PlotAdmin(admin.ModelAdmin):
-    list_display =  ['plot_name','soil_type','farm','comments']
+    list_display =  ['plot_name','soil_type','farm']
     search_fields = ('plot_name',)
     list_filter = ('soil_type','farm',)
     list_per_page = SIZE_LISTE_PER_PAGE
     list_max_show_all = SIZE_LISTE_SHOW_ALL
-    inlines=[CropProductionInline, AddCropProductionInline]
+    inlines=[AddCropProductionInline,CropProductionInline]
 
 class SensorAdmin(admin.ModelAdmin):
     list_display=['sensor_id','sensor_type','sensor_unit','parcelles_courantes','cultures_associees']
@@ -97,12 +109,14 @@ class SensorAdmin(admin.ModelAdmin):
     inlines = [SensorPlotInline,CropProductionSensorInline]
 
 class CropProductionAdmin(admin.ModelAdmin):
-    list_display=['name','crop','start_date','end_date','yield_field','plot']
-    search_fields = ('name',)
-    list_filter = ('crop','plot',)
-    list_per_page = SIZE_LISTE_PER_PAGE
-    list_max_show_all = SIZE_LISTE_SHOW_ALL
-    inlines=[CropProductionDiseaseInline]
+	list_display=['name','crop','start_date','end_date','plot']
+	search_fields = ('name',)
+	list_filter = ('crop','plot',)
+	list_per_page = SIZE_LISTE_PER_PAGE
+	list_max_show_all = SIZE_LISTE_SHOW_ALL
+	inlines=[CropProductionDiseaseInline]
+
+
 
 class AlertAdmin(admin.ModelAdmin):
     list_display=['disease','crop_production','risk_rate','alert_date']
@@ -120,8 +134,6 @@ class AlertAdmin(admin.ModelAdmin):
         pass
 
 class AnomalyAdmin(admin.ModelAdmin):
-
-
     list_display=['disease','crop_production','occurence_date','reporting_date','client']
     readonly_fields=['disease','crop_production','occurence_date','reporting_date','client']
     # Remove the delete Admin Action for this Model
@@ -145,7 +157,7 @@ class AnomalySummaryAdmin(admin.ModelAdmin):
         'crop_production',
     )
     css = {
-             'all': ('static/css/summary.css',)
+             'all': ('static/css/summarynew.css',)
         }
     def has_add_permission(self, request):
         return False
@@ -206,16 +218,20 @@ class AnomalySummaryAdmin(admin.ModelAdmin):
 
         } for x in summary_over_time]
         return response
+FEEDBACKCHOICE={
+'confirmed':'Confirmée',
+'denied':'Déclinée',
+}
 
 @admin.register(AlertSummary)
 class AlertSummaryAdmin(admin.ModelAdmin):
     change_list_template = 'admin/alerts_summary__change_list.html'
     date_hierarchy = 'feedback_date'
     list_filter = (
-        'crop_production','disease',
+        'disease','crop_production',
     )
     css = {
-             'all': ('static/css/summary.css',)
+             'all': ('static/css/summarynew.css',)
         }
     def has_add_permission(self, request):
         return False
@@ -243,7 +259,7 @@ class AlertSummaryAdmin(admin.ModelAdmin):
         )
         response.context_data['summary']= [{
             'disease': Disease.objects.filter(disease_id=l['disease']).values('disease_name')[0]['disease_name'],
-            'feedback_type':l['feedback_type'],
+            'feedback_type':FEEDBACKCHOICE.get(l['feedback_type'],'Aucun feedback'),
             'total': l['total'] or 0,
 
         } for l in liste]
@@ -253,7 +269,7 @@ class AlertSummaryAdmin(admin.ModelAdmin):
             qs.aggregate(**metrics)
         )
         #print "diseases :",qs.values('disease').annotate(**metrics).order_by('-total')
-        summary_over_time = qs.annotate(
+        summary_over_time = qs.filter(feedback_date__isnull=False).annotate(
             period=Trunc('feedback_date','year',output_field=DateTimeField()),
         ).values('period','feedback_type').annotate(total=Count('alert_id')).order_by('period')
         print "summary_over_time", summary_over_time
@@ -270,7 +286,7 @@ class AlertSummaryAdmin(admin.ModelAdmin):
 
         response.context_data['summary_over_time'] = [{
             'period': i['period'],
-            'feedback_type':i['feedback_type'],
+            'feedback_type': i['feedback_type'],
             'total': i['total'] or 0,
             'pct': int(float(i['total'] ) / float(high)* 100)
                if high > low else 0,
@@ -282,7 +298,7 @@ class AlertSummaryAdmin(admin.ModelAdmin):
         return response
 
 class ClientAdmin(admin.ModelAdmin):
-    list_display=['username','first_name','last_name','email','gender','date_joined','is_active','is_superuser']
+    list_display=['username','first_name','last_name','email','gender','date_joined','is_active']
     search_fields = ('username','first_name','last_name','email')
     list_filter = ('gender','language','is_superuser','is_active','groups')
     list_per_page = SIZE_LISTE_PER_PAGE
@@ -292,7 +308,7 @@ class ClientAdmin(admin.ModelAdmin):
             'fields': ('last_name','first_name','gender','language',
             'phone_contact','phone_sms')
         }),
-        ('Informations de connexion', {
+        ('Informations de compte', {
             'fields': ('username','email','is_staff', 'is_superuser','notification_sms','notification_email','groups')
 
         }),
@@ -312,16 +328,7 @@ class ClientAdmin(admin.ModelAdmin):
         obj.last_modified_by = request.user
         obj.save()
 
-
 class FarmAdmin(admin.ModelAdmin):
-
-    # def get_queryset(self, request):
-    #     qs = super(FarmAdmin, self).get_queryset(request)
-    #     if(request.user.is_superuser):
-    #         return qs
-    #     else:
-    #         return qs.filter(clients=request.user.client_id)
-
     list_display=['farm_name','city' ,'proprieraites']
     search_fields = ('farm_name',)
     list_filter = ('city','clients')
@@ -344,7 +351,3 @@ admin.site.register(Farm, FarmAdmin)
 admin.site.register(CropProduction, CropProductionAdmin)
 admin.site.register(Alert,AlertAdmin)
 admin.site.register(Anomaly,AnomalyAdmin)
-
-admin.site.site_header = 'Panneau d\'administration'
-#admin.site.index_title = ''
-admin.site.site_title = 'Administration panel'

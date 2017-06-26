@@ -1,6 +1,5 @@
-
-td, th {
-    padding: 20px !important;
+th,td {
+    padding: 10px !important;
     font-size: 14px;
 }
 a:link, a:visited {

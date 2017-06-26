@@ -1,13 +1,13 @@
 {% extends "admin/change_list.html" %}
 {% block content_title %}
-    <h2><i class="fa fa-bar-chart fa-lg" aria-hidden="true"></i>  Statistiques sur les alertes </h2>
+    <h2><i class="glyphicon glyphicon-stats" aria-hidden="true"></i>  Statistiques sur les alertes </h2>
 {% endblock %}
 {% block result_list %}
 {% load humanize %}
 {{ my_num|intcomma }}
 {% load staticfiles %}
 <!--<script src="https://use.fontawesome.com/9333a3980f.js"></script>-->
-<link rel="stylesheet" type="text/css" href="{% static "css/summary.css" %}" />
+<link rel="stylesheet" type="text/css" href="{% static "css/summarynew.css" %}" />
 <div class=”results”>
 <table id="summary">
 
@@ -36,7 +36,7 @@
   <tr >
     <td> {{ row.disease }} </td>
 
-    <td> <i class ="{{row.feedback_type}}" aria-hidden="true" ></i> {{  row.feedback_type }} </td>
+    <td> {{  row.feedback_type }} <i class ="{{row.feedback_type}}" aria-hidden="true" ></i></td>
     <td> {{ row.total }} </td>
 
 
@@ -78,15 +78,15 @@
 
 <script>
 
-liste_confirmed = document.getElementsByClassName("confirmed");
+liste_confirmed = document.getElementsByClassName("Confirmée");
 
   for (var i = 0; i < liste_confirmed.length; i++) {
     liste_confirmed[i].className+=" fa fa-check";
   }
-liste_denied = document.getElementsByClassName("denied");
+liste_denied = document.getElementsByClassName("Déclinée");
 
   for (var i = 0; i < liste_denied.length; i++) {
-    liste_denied[i].className+=" fa fa-times-circle";
+    liste_denied[i].className+=" fa fa-remove";
   }
 
 </script>

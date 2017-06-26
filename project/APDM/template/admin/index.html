@@ -80,8 +80,8 @@ td, th {
 
 {% if app_list %}
     {% for app in app_list %}
-
-    {% if app.app_label != "oauth2_provider"%}
+  
+    {% if app.app_label != "oauth2_provider" and app.models|length != 4 %}
 
         <div class="app-{{ app.app_label }} module">
         <table>
@@ -100,7 +100,7 @@ td, th {
       {% endif %}
         </caption>
         {% for model in app.models %}
-          {% if model.object_name != "Client" and model.object_name != "AlertSummary" and model.object_name != "AnomalySummary" and model.object_name != "CrontabSchedule" and model.object_name != "IntervalSchedule" and model.object_name != "WorkerState" %}
+          {% if model.object_name != "Client" and model.object_name != "Anomaly" and model.object_name != "Alert" and model.object_name != "AlertSummary" and model.object_name != "AnomalySummary" and model.object_name != "CrontabSchedule" and model.object_name != "IntervalSchedule" and model.object_name != "WorkerState" %}
 
 
                 <tr class="model-{{ model.object_name|lower }}" >
@@ -125,7 +125,7 @@ td, th {
                         {% if model.object_name == "TaskState" %}
 
                           <td><i id ="{{model.object_name}}" aria-hidden="true" style="padding-left:10px" ></i></td>
-                          <th scope="row" onclick="location.href='{{ model.admin_url }}';"><a href="{{ model.admin_url }}"  id="model_name">Résultats de prévisions périodiques</a></th>
+                          <th scope="row" onclick="location.href='{{ model.admin_url }}';"><a href="{{ model.admin_url }}"  id="model_name">Résultats des prévisions périodiques</a></th>
 
                         {%else%}
 
@@ -167,13 +167,21 @@ td, th {
               </tr>
         {% else %}
             {% if app.app_label == "djcelery"%}
-
+                  <tr class="model-alert" >
+                      <td><i  id ="Alert" aria-hidden="true" style="padding-left:10px" ></i></td>
+                      <th scope="row" onclick="location.href='/admin/APDM/alert/';"><a href="/admin/APDM/alert/"  id="model_name">Alertes</a></th>
+                      <td><button class="btn btn-success" id="hidden" >ajouter</button></td>
+                  </tr>
                   <tr class="model-alertsummary" >
                       <td><i class="glyphicon glyphicon-stats fa-lg" id ="AlertSummary" aria-hidden="true" style="padding-left:10px" ></i></td>
                       <th scope="row" onclick="location.href='/admin/APDM/alertsummary/';"><a href="/admin/APDM/alertsummary/"  id="model_name">Statistiques sur les alertes</a></th>
                       <td><button class="btn btn-success" id="hidden" >ajouter</button></td>
                   </tr>
-
+                  <tr class="model-anomaly" >
+                      <td><i  id ="Anomaly" aria-hidden="true" style="padding-left:10px" ></i></td>
+                      <th scope="row" onclick="location.href='/admin/APDM/anomaly/';"><a href="/admin/APDM/anomaly/"  id="model_name">Anomalies</a></th>
+                      <td><button class="btn btn-success" id="hidden" >ajouter</button></td>
+                  </tr>
                   <tr class="model-anomalysummary" >
                       <td><i class="glyphicon glyphicon-stats fa-lg" aria-hidden="true" style="padding-left:10px" ></i></td>
                       <th scope="row" onclick="location.href='/admin/APDM/anomalysummary/';"><a href="/admin/APDM/anomalysummary/"  id="model_name">Statistiques sur les anomalies</a></th>

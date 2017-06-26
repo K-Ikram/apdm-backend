@@ -135,18 +135,39 @@ fieldset.collapsed h2 {
         {% block content_title %}
         {% if title == "Modification de Alerte" %} <h1><i class="fa fa-bell-o" aria-hidden="true"></i> Détails de l'alerte </h1>{% endif %}
         {% if title == "Modification de Anomalie" %} <h1><i class="fa fa-flag fa-lg" aria-hidden="true"></i> Détails de l'anomalie </h1>{% endif %}
-
+{{colM}}
         {% if title == "Sélectionnez l'objet Alerte à changer" %}<h2> <i class="fa fa-bell-o" aria-hidden="true"></i> Liste des alertes </h2> {% endif %}
         {% if title == "Sélectionnez l'objet Anomalie à changer" %}<h2><i class="fa fa-flag" aria-hidden="true"></i>  Liste des anomalies </h2> {% endif %}
-        {% if title == "Administration de Apdm" %}<h1><i class="fa fa-wrench" aria-hidden="true"></i>  Administration de Apdm </h1> {% endif %}
-        {% if title == "Administration du site" %}<h1 style="margin-bottom: 5%;"><i class="fa fa-wrench" aria-hidden="true"></i>  Administration de Apdm </h1> {% endif %}
+        {% if title == "Administration de Apdm" %}<h1><i class="fa fa-wrench" aria-hidden="true"></i>  Administration de SafeCrop </h1> {% endif %}
+        {% if title == "Administration du site" %}<h1 style="margin-bottom: 5%;"><i class="fa fa-wrench" aria-hidden="true"></i>  Administration de SafeCrop </h1> {% endif %}
         {% if title == "Sélectionnez l'objet Capteur à changer" %}<h2><i class="fa fa-thermometer-half" aria-hidden="true"></i>  Liste des capteurs </h2> {% endif %}
+        {% if title == "Ajout Capteur" %}<h1><i class="fa fa-thermometer-half" aria-hidden="true"></i>  Ajouter capteur </h1> {% endif %}
+        {% if title == "Modification de Capteur" %}<h1><i class="fa fa-thermometer-half" aria-hidden="true"></i>  Détails du capteur </h1> {% endif %}
+
         {% if title == "Sélectionnez l'objet Culture à changer" %}<h2><i class="fa fa-pagelines" aria-hidden="true"></i>  Liste des cultures </h2> {% endif %}
-
+        {% if title == "Ajout Culture" %}<h1><i class="fa fa-pagelines" aria-hidden="true"></i>  Ajouter une culture </h1> {% endif %}
+        {% if title == "Modification de Culture" %}<h1><i class="fa fa-pagelines" aria-hidden="true"></i>  Détails de la culture </h1> {% endif %}
         {% if title == "Modification de Ferme" %}<h1><i class="fa fa-tree" aria-hidden="true"></i>  Détails de la ferme </h1> {% endif %}
-        {% if title == "Modification de Utilisateur" %}<h1><i class="fa fa-user-circle-o" aria-hidden="true"></i>  Profil de l'utilisateur </h1> {% endif %}
-        {% if title == "Modification de Parcelle" %}<h1><i class="fa fa-user-circle-o" aria-hidden="true"></i>  Détails de la parcelle </h1> {% endif %}
+        {% if title == "Ajout Ferme" %}<h1><i class="fa fa-tree" aria-hidden="true"></i>  Ajouter une ferme </h1> {% endif %}
+        {% if title == "Modification de groupe" %}<h1><i class="fa fa-users" aria-hidden="true"></i>  Modification du groupe </h1> {% endif %}
+        {% if title == "Sélectionnez l'objet groupe à changer" %}<h1><i class="fa fa-users" aria-hidden="true"></i>  Liste des groupes </h1> {% endif %}
+        {% if title == "Ajout groupe" %}<h1><i class="fa fa-users" aria-hidden="true"></i>  Ajouter un groupe </h1> {% endif %}
+        {% if title == "Ajout Utilisateur" %}<h1><i class="fa fa-user-circle-o" aria-hidden="true"></i>  Ajouter un utilisateur </h1> {% endif %}
 
+        {% if title == "Modification de Utilisateur" %}<h1><i class="fa fa-user-circle-o" aria-hidden="true"></i>  Profil de l'utilisateur </h1> {% endif %}
+        {% if 'Historique' in title %}<h1><i class="fa fa-history" aria-hidden="true"></i>  {{title}} </h1> {% endif %}
+
+        {% if title == "Ajout tâche périodique" %}<h1><i class="fa fa-clock-o" aria-hidden="true"></i>  Ajouter une prévision périodique </h1> {% endif %}
+        {% if title == "Modification de tâche périodique" %}<h1><i class="fa fa-clock-o" aria-hidden="true"></i>  Détails de la prévision périodique </h1> {% endif %}
+
+        {% if title == "Sélectionnez l'objet Utilisateur à changer" %}<h1><i class="fa fa-user-circle-o" aria-hidden="true"></i>  Liste des utilisateurs </h1> {% endif %}
+        {% if title == "Modification de Parcelle" %}<h1><i class="fa fa-leaf" aria-hidden="true"></i>  Détails de la parcelle </h1> {% endif %}
+        {% if title == "Ajout Parcelle" %}<h1><i class="fa fa-leaf" aria-hidden="true"></i>  Ajouter une parcelle </h1> {% endif %}
+
+        {% if title == "Tâches" %}<h2><i class="fa fa-tasks" aria-hidden="true"></i>  Résultats des prévisions périodiques </h2> {% endif %}
+        {% if title == "Détail de la tâche" %}<h1><i class="fa fa-tasks" aria-hidden="true"></i>  Détails du résultat la prévision périodique </h1> {% endif %}
+
+        {% if title == "Sélectionnez l'objet tâche périodique à changer" %}<h2><i class="fa fa-clock-o" aria-hidden="true"></i>  Prévisions périodiques </h2> {% endif %}
         {% if title == "Sélectionnez l'objet Ferme à changer" %}<h2><i class="fa fa-tree" aria-hidden="true"></i>  Liste des fermes </h2> {% endif %}
         {% if title == "Sélectionnez l'objet Parcelle à changer" %}<h2><i class="fa fa-leaf" aria-hidden="true"></i>  Liste des parcelles </h2> {% endif %}
         {% endblock %}
@@ -170,7 +191,22 @@ d= document.getElementById("Alert");
 if (d != null){
   d.className="fa fa-bell-o fa-lg";
 }
-
+d= document.getElementById("Group");
+if (d != null){
+  d.className="fa fa-users fa-lg";
+}
+d= document.getElementById("Client");
+if (d != null){
+  d.className="fa fa-user-circle-o fa-lg";
+}
+d= document.getElementById("TaskState");
+if (d != null){
+  d.className="fa fa-tasks fa-lg";
+}
+d= document.getElementById("PeriodicTask");
+if (d != null){
+  d.className="fa fa-clock-o fa-lg";
+}
 d= document.getElementById("CropProduction");
 if (d != null){
   d.className="fa fa-pagelines fa-lg";
