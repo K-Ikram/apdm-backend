@@ -85,10 +85,10 @@ WSGI_APPLICATION = 'project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'APDMDB',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST' : 'localhost',
+        'NAME': 'esi_apdm',
+        'USER': 'esi',
+        'PASSWORD': 'esi',
+        'HOST' : 'mysql-esi.alwaysdata.net',
         'PORT': '3306',
 
     }

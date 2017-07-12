@@ -329,7 +329,7 @@ INSERT INTO `city` (`city_id`, `city_name`) VALUES
 (6, 'Bejaia'),
 (7, 'Biskra'),
 (8, 'Bechar'),
-(9, 'Bl_ida'),
+(9, 'Blida'),
 (10, 'Bouira'),
 (11, 'Tamanrasset'),
 (12, 'Tebessa'),
@@ -340,9 +340,9 @@ INSERT INTO `city` (`city_id`, `city_name`) VALUES
 (17, 'Djelfa'),
 (18, 'Jijel'),
 (19, 'Setif'),
-(20, 'Sa_ida'),
+(20, 'Saida'),
 (21, 'Skikda'),
-(22, 'S_idi Bel Abbes'),
+(22, 'Sidi Bel Abbes'),
 (23, 'Annaba'),
 (24, 'Guelma'),
 (25, 'Constantine'),
@@ -354,7 +354,7 @@ INSERT INTO `city` (`city_id`, `city_name`) VALUES
 (31, 'Oran'),
 (32, 'El Bayadh'),
 (33, 'Illizi'),
-(34, 'Bordj Bou Arrer_idj'),
+(34, 'Bordj Bou Arreridj'),
 (35, 'Boumerdes'),
 (36, 'Tarf'),
 (37, 'Tindouf'),
@@ -643,7 +643,7 @@ INSERT INTO `sensor` (`sensor_id`, `sensor_type`, `sensor_unit`) VALUES
 --
 DROP TABLE IF EXISTS `alert_client`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `alert_client`  AS  select `apdm_client`.`client_id` AS `client_id`,`alert`.`alert_id` AS `alert_id` from (((((`apdm_ownfarm` join `apdm_client`) join `crop_production`) join `plot`) join `farm`) join `alert`) where ((`apdm_ownfarm`.`farm_id` = `farm`.`farm_id`) and (`apdm_client`.`client_id` = `apdm_ownfarm`.`client_id`) and (`plot`.`farm_id` = `farm`.`farm_id`) and (`crop_production`.`plot_id` = `plot`.`plot_id`) and (`alert`.`crop_production_id` = `crop_production`.`crop_production_id`)) ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`esi`@`localhost` SQL SECURITY DEFINER VIEW `alert_client`  AS  select `apdm_client`.`client_id` AS `client_id`,`alert`.`alert_id` AS `alert_id` from (((((`apdm_ownfarm` join `apdm_client`) join `crop_production`) join `plot`) join `farm`) join `alert`) where ((`apdm_ownfarm`.`farm_id` = `farm`.`farm_id`) and (`apdm_client`.`client_id` = `apdm_ownfarm`.`client_id`) and (`plot`.`farm_id` = `farm`.`farm_id`) and (`crop_production`.`plot_id` = `plot`.`plot_id`) and (`alert`.`crop_production_id` = `crop_production`.`crop_production_id`)) ;
 
 -- --------------------------------------------------------
 
@@ -652,7 +652,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 DROP TABLE IF EXISTS `crop_client`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `crop_client`  AS  select `apdm_client`.`client_id` AS `client_id`,`crop_production`.`crop_production_id` AS `crop_production_id` from ((((`apdm_ownfarm` join `apdm_client`) join `crop_production`) join `plot`) join `farm`) where ((`apdm_ownfarm`.`farm_id` = `farm`.`farm_id`) and (`apdm_client`.`client_id` = `apdm_ownfarm`.`client_id`) and (`plot`.`farm_id` = `farm`.`farm_id`) and (`crop_production`.`plot_id` = `plot`.`plot_id`)) ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`esi`@`localhost` SQL SECURITY DEFINER VIEW `crop_client`  AS  select `apdm_client`.`client_id` AS `client_id`,`crop_production`.`crop_production_id` AS `crop_production_id` from ((((`apdm_ownfarm` join `apdm_client`) join `crop_production`) join `plot`) join `farm`) where ((`apdm_ownfarm`.`farm_id` = `farm`.`farm_id`) and (`apdm_client`.`client_id` = `apdm_ownfarm`.`client_id`) and (`plot`.`farm_id` = `farm`.`farm_id`) and (`crop_production`.`plot_id` = `plot`.`plot_id`)) ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
